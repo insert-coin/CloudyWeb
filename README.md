@@ -4,6 +4,55 @@ Cloudyweb is
 - CloudyPanel: administration panel for operator
 - CloudyService: web service for client
 
+## Prerequisites ##
+
+- python >= 3.4
+- pip
+- virtualenv/wrapper (optional)
+
+## Installation ##
+### Creating the environment (optional) ###
+Create a virtual python environment for the project.
+If you're not using virtualenv or virtualenvwrapper you may skip this step.
+
+#### For virtualenvwrapper ####
+```bash
+mkvirtualenv -p /usr/bin/python3 cloudyweb
+workon cloudyweb
+```
+
+#### For virtualenv ####
+```bash
+virtualenv -p /usr/bin/python3 cloudyweb-env
+cd cloudyweb-env
+source bin/activate
+```
+
+### Fork & Clone the code ###
+Obtain the url to your git repository.
+
+```bash
+git clone <URL_TO_GIT_RESPOSITORY>
+```
+
+### Install requirements ###
+```bash
+cd cloudyweb
+pip install -r requirements.txt
+```
+
+### Sync database ###
+```bash
+python manage.py migrate
+```
+
+## Running ##
+```bash
+python manage.py runserver
+```
+
+Open browser to http://127.0.0.1:8000
+
 
 ## API Usage
 

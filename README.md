@@ -5,7 +5,7 @@ Cloudyweb is
 - CloudyService: web service for client
 
 
-# API Usage
+## API Usage
 
     # Create User
     $ curl -X POST http://127.0.0.1:8000/users/ --data "username=john&password=doe"
@@ -19,6 +19,6 @@ Cloudyweb is
     $ curl -X GET http://127.0.0.1:8000/users/ -H 'Authorization: Token abcdefghijklmnopqrstuvwxyz123456790'
 	==> [{"username":"john","email":"","first_name":"","last_name":""}, ...]
 
-# List of Resources
+## List of Resources
 
 * `/users/`

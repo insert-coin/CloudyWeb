@@ -24,5 +24,5 @@ router.register(r'users', accounts_views.UserViewSet)
 urlpatterns = router.urls + [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    url(r'^api-token-auth/', authtoken_views.obtain_auth_token),
+    url(r'^api-token-auth/', authtoken_views.obtain_auth_token, name='token-auth'),
 ]

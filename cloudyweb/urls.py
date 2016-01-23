@@ -17,9 +17,12 @@ from django.contrib import admin
 from rest_framework.authtoken import views as authtoken_views
 from rest_framework import routers
 from accounts import views as accounts_views
+from cloudygames import views as cloudygames_views
 
 router = routers.DefaultRouter()
 router.register(r'users', accounts_views.UserViewSet)
+router.register(r'games', cloudygames_views.GameViewSet)
+router.register(r'mygames', cloudygames_views.GameList)
 
 urlpatterns = router.urls + [
     url(r'^admin/', include(admin.site.urls)),

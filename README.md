@@ -4,6 +4,10 @@ Cloudyweb is
 - CloudyPanel: administration panel for operator
 - CloudyService: web service for client
 
+Continuous Integration:
+
+[![Build Status](https://travis-ci.org/insert-coin/cloudyweb.svg?branch=master)](https://travis-ci.org/insert-coin/cloudyweb)
+
 ## Prerequisites ##
 
 - python >= 3.4
@@ -52,6 +56,12 @@ python manage.py runserver
 ```
 
 Open browser to http://127.0.0.1:8000
+
+
+## Testing Locally ##
+```bash
+python manage.py test
+```
 
 
 ## API Usage

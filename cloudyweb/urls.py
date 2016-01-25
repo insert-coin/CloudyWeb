@@ -21,8 +21,7 @@ from cloudygames import views as cloudygames_views
 
 router = routers.DefaultRouter()
 router.register(r'users', accounts_views.UserViewSet)
-router.register(r'games', cloudygames_views.GameViewSet)
-router.register(r'mygames', cloudygames_views.GameList)
+router.register(r'games', cloudygames_views.GameViewSet, 'owned')
 
 urlpatterns = router.urls + [
     url(r'^admin/', include(admin.site.urls)),

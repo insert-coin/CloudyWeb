@@ -47,7 +47,7 @@ INSTALLED_APPS = (
 
     # Internal Apps
     'accounts',
-
+    'cloudygames',
 )
 
 MIDDLEWARE_CLASSES = (

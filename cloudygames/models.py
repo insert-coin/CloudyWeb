@@ -6,7 +6,7 @@ class Game(models.Model):
     publisher = models.CharField(max_length=45)
     max_limit = models.IntegerField()
     address = models.CharField(max_length=45)
-    user = models.ManyToManyField(User)
+    users = models.ManyToManyField(User)
 
 class PlayerSaveData(models.Model):
     saved_file = models.CharField(max_length=45)

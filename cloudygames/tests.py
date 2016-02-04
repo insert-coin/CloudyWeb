@@ -34,7 +34,7 @@ class CloudyGamesTests(APITestCase):
         self.assertEqual(len(response.data), 3)
 
     def test_get_owned_gamelist(self):
-    	#user1
+        #user1
         client = APIClient()
         client.force_authenticate(user=self.user1)
         response = client.get('/games/?owned=1')
@@ -46,3 +46,16 @@ class CloudyGamesTests(APITestCase):
         response = client.get('/games/?owned=1')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
+
+    def test_join_game(self):
+        #user1 joins game1
+        client = APIClient()
+        client.force_authenticate(user=self.user1)
+        response = client.put('/game-session/', {'game_id': self.game1.id}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        #user2 fails to join game1
+        client = APIClient()
+        client.force_authenticate(user=self.user2)
+        response = client.put('/game-session/', {'game_id': self.game1.id}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+

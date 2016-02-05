@@ -17,6 +17,10 @@ class PlayerSaveDataSerializer(serializers.HyperlinkedModelSerializer):
         model = PlayerSaveData
         fields = ('id', 'saved_file', 'is_autosaved', 'player', 'game')
 
+    def create(self, data):
+        data.player = self.request.user
+        return PlayerSaveData.objects.create(data)
+
 class GameSessionSerializer(serializers.HyperlinkedModelSerializer):
     player = UserSerializer()
     game = GameSerializer()

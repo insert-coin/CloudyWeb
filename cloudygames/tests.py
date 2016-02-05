@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.test import APITestCase, force_authenticate, APIClient
 
-from cloudygames.models import Game
+from cloudygames.models import Game, PlayerSaveData
 from cloudygames.serializers import GameSerializer
 
 import json
@@ -25,11 +25,23 @@ class CloudyGamesTests(APITestCase):
         self.game1.users.add(self.user1, self.user2)
         self.game2.users.add(self.user1)
 
+        self.savedUser1Game1auto = PlayerSaveData.objects.create(player=self.user1, game=self.game1, saved_file="game1auto.txt")
+        self.savedUser1Game1 = PlayerSaveData.objects.create(player=self.user1, game=self.game1, saved_file="game1.txt", is_autosaved=False)
+        self.savedUser1Game2 = PlayerSaveData.objects.create(player=self.user1, game=self.game2, saved_file="game2.txt")
+
     def test_get_gamelist(self):
         client = APIClient()
         client.force_authenticate(user=self.user1)
 
-        response = client.get('/games/')
+        response = client.get('/games/?owned=0')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 3)
+
+        response = client.get('/games/?id=1&name=game1')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+
+        response = client.get('/games/?publisher=pub1')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 3)
 
@@ -47,15 +59,42 @@ class CloudyGamesTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
 
-    def test_join_game(self):
-        #user1 joins game1
+    def test_join_quit_game(self):
+        #user1 joins game1 & 2
         client = APIClient()
         client.force_authenticate(user=self.user1)
-        response = client.put('/game-session/', {'game_id': self.game1.id}, format='json')
+        response = client.put('/game-session/', {'game': self.game1.id}, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response = client.put('/game-session/', {'game': self.game2.id}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        #read user1's game session
+        response = client.get('/game-session/', {}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+        response = client.get('/game-session/', {'game': self.game1.id}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        #user1 quits game2
+        response = client.delete('/game-session/', {'game': self.game2.id}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = client.get('/game-session/', {'game': self.game2.id}, format='json')
+        self.assertEqual(len(response.data), 0)
         #user2 fails to join game1
         client = APIClient()
         client.force_authenticate(user=self.user2)
-        response = client.put('/game-session/', {'game_id': self.game1.id}, format='json')
+        response = client.put('/game-session/', {'game': self.game1.id}, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_player_save_data(self):
+        client = APIClient()
+        client.force_authenticate(user=self.user1)
+
+        response = client.get('/save-data/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 3)
+        response = client.get('/save-data/?game=1')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+        response = client.get('/save-data/?game=2')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)

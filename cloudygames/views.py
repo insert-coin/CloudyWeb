@@ -78,16 +78,16 @@ class GameSessionViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request, format=None):
-    	data = json.loads(request.body.decode())
+        data = json.loads(request.body.decode())
 
-    	_game = Game.objects.get(id=data['game'])
-    	_user = self.request.user
-    	_session = GameSession.objects.get(game=_game, player=_user)
+        _game = Game.objects.get(id=data['game'])
+        _user = self.request.user
+        _session = GameSession.objects.get(game=_game, player=_user)
 
-    	if(GameSession.quitGame(self, _session)):
-    		_session.delete()
-    		return Response(status=status.HTTP_200_OK)
-    	return Response(status=status.HTTP_400_BAD_REQUEST)
+        if(GameSession.quitGame(self, _session)):
+            _session.delete()
+            return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
 class PlayerSaveDataViewSet(viewsets.ModelViewSet):
     serializer_class = PlayerSaveDataSerializer

@@ -44,7 +44,6 @@ class PlayerSaveDataFilter(django_filters.FilterSet):
 ######################## ViewSet ############################
 
 class GameViewSet(viewsets.ModelViewSet):
-    queryset = Game.objects.all()
     serializer_class = GameSerializer
     filter_class = GameFilter
 
@@ -56,44 +55,46 @@ class GameViewSet(viewsets.ModelViewSet):
         return Game.objects.all().order_by('name')
 
 class GameSessionViewSet(viewsets.ModelViewSet):
-    queryset = GameSession.objects.all()
     serializer_class = GameSessionSerializer
     filter_class = GameSessionFilter
     
     def get_queryset(self):
         _user = self.request.user
+        if(_user.is_staff):
+        	return GameSession.objects.all()
         return GameSession.objects.filter(player=_user)
 
     def put(self, request, format=None):
-        data = json.loads(request.body.decode())
+        _data = json.loads(request.body.decode())
 
-        _game = Game.objects.get(id=data['game'])
+        _game = Game.objects.get(id=_data['game'])
         _user = self.request.user
-        _controller = GameSession.joinGame(self, _game)
+        _controller = GameSession.join_game(self, _game)
         if(_controller == -1):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        session = GameSession.objects.create(game=_game, player=_user, controller=_controller)
-        serializer = GameSessionSerializer(session)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        _session = GameSession.objects.create(game=_game, player=_user, controller=_controller)
+        _serializer = GameSessionSerializer(_session)
+        return Response(_serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request, format=None):
-        data = json.loads(request.body.decode())
+        _data = json.loads(request.body.decode())
 
-        _game = Game.objects.get(id=data['game'])
+        _game = Game.objects.get(id=_data['game'])
         _user = self.request.user
         _session = GameSession.objects.get(game=_game, player=_user)
 
-        if(GameSession.quitGame(self, _session)):
+        if(GameSession.quit_game(self, _session)):
             _session.delete()
             return Response(status=status.HTTP_200_OK)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 class PlayerSaveDataViewSet(viewsets.ModelViewSet):
     serializer_class = PlayerSaveDataSerializer
-    queryset = PlayerSaveData.objects.all()
     filter_class = PlayerSaveDataFilter
 
     def get_queryset(self):
         _user = self.request.user
+        if(_user.is_staff):
+        	return GameSession.objects.all()
         return PlayerSaveData.objects.filter(player=_user)

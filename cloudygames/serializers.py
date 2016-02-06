@@ -2,14 +2,14 @@ from rest_framework import serializers
 from accounts.serializers import UserSerializer
 from cloudygames.models import Game, PlayerSaveData, GameSession
 
-class GameSerializer(serializers.HyperlinkedModelSerializer):
+class GameSerializer(serializers.ModelSerializer):
     users = UserSerializer(many=True)
 
     class Meta:
         model = Game
         fields = ('id', 'name', 'publisher', 'max_limit', 'address', 'users')
 
-class PlayerSaveDataSerializer(serializers.HyperlinkedModelSerializer):
+class PlayerSaveDataSerializer(serializers.ModelSerializer):
     player = UserSerializer()
     game = GameSerializer()
 
@@ -21,7 +21,7 @@ class PlayerSaveDataSerializer(serializers.HyperlinkedModelSerializer):
         data.player = self.request.user
         return PlayerSaveData.objects.create(data)
 
-class GameSessionSerializer(serializers.HyperlinkedModelSerializer):
+class GameSessionSerializer(serializers.ModelSerializer):
     player = UserSerializer()
     game = GameSerializer()
 

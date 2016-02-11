@@ -61,23 +61,27 @@ class GameSessionViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         _user = self.request.user
         if(_user.is_staff):
-        	return GameSession.objects.all()
+            return GameSession.objects.all()
         return GameSession.objects.filter(player=_user)
 
-    def put(self, request, format=None):
-        _data = json.loads(request.body.decode())
+    def create(self, request):
+        #import ipdb; ipdb.set_trace()
+        _serializer = GameSessionSerializer(data=request.data)
 
-        _game = Game.objects.get(id=_data['game'])
-        _user = self.request.user
-        _controller = GameSession.join_game(self, _game)
-        if(_controller == -1):
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        if _serializer.is_valid():
+            _gameid = _serializer.data['game']
+            _game = Game.objects.get(id=_gameid)
+            _user = self.request.user
+            _controller = GameSession.join_game(self, _game)
+            if(_controller == -1):
+                return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        _session = GameSession.objects.create(game=_game, player=_user, controller=_controller)
-        _serializer = GameSessionSerializer(_session)
-        return Response(_serializer.data, status=status.HTTP_201_CREATED)
+            _session = GameSession.objects.create(game=_game, player=_user, controller=_controller)
+            _serializer = GameSessionSerializer(_session)
+            return Response(_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, format=None):
+    def destroy(self, request, format=None):
         _data = json.loads(request.body.decode())
 
         _game = Game.objects.get(id=_data['game'])
@@ -96,5 +100,5 @@ class PlayerSaveDataViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         _user = self.request.user
         if(_user.is_staff):
-        	return GameSession.objects.all()
+            return GameSession.objects.all()
         return PlayerSaveData.objects.filter(player=_user)

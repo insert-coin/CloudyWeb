@@ -21,31 +21,27 @@ class GameSession(models.Model):
     game = models.ForeignKey(Game, blank=True, null=True)
     controller = models.IntegerField(blank=True, null=True)
 
-    def join_game(self, _game):
-        _controller = -1
+    def join_game(self, gameobj):
+        controllerid = -1
         try:
-            _session = GameSession.objects.get(player=self.request.user, game=_game)
-            _controller = _session.controller
-        except GameSession.DoesNotExist:
-            try:
-                _controllers = range(_game.max_limit)
-                _occupied = GameSession.objects.filter(game=_game).values_list('controller', flat=True)
-                _available = list(set(_controllers)-set(_occupied))
-                _controller = _available[0]
-            except IndexError:
-                _controller = -1
+            controllers = range(gameobj.max_limit)
+            occupied = GameSession.objects.filter(game=gameobj).values_list('controller', flat=True)
+            available = list(set(controllers)-set(occupied))
+            controllerid = available[0]
+        except IndexError:
+            controllerid = -1
 
-        if(_controller != -1):
-            _command = JOIN_CMD + str(_controller).zfill(4)
-            _result = utils.connect_to_CPP(_command)
-            if(_result != ERROR_MSG):
-                return _controller
+        if(controllerid != -1):
+            command = JOIN_CMD + str(controllerid).zfill(4)
+            result = utils.connect_to_CPP(command)
+            if(result != ERROR_MSG):
+                return controllerid
         return -1
 
-    def quit_game(self, _game_session):
-        _command = QUIT_CMD + str(_game_session.controller).zfill(4)
-        _result = utils.connect_to_CPP(_command)
-        if(_result != ERROR_MSG):
+    def quit_game(self, game_session):
+        command = QUIT_CMD + str(game_session.controller).zfill(4)
+        result = utils.connect_to_CPP(command)
+        if(result != ERROR_MSG):
             return True
         return False
 

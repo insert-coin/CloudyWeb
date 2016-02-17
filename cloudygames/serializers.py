@@ -3,8 +3,7 @@ from accounts.serializers import UserSerializer
 from cloudygames.models import Game, PlayerSaveData, GameSession
 
 class GameSerializer(serializers.ModelSerializer):
-    #users = UserSerializer(many=True)
-
+	
     class Meta:
         model = Game
         fields = ('id', 'name', 'publisher', 'max_limit', 'address', 'users')
@@ -20,7 +19,7 @@ class PlayerSaveDataSerializer(serializers.ModelSerializer):
         return PlayerSaveData.objects.create(data)
 
 class GameSessionSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = GameSession
         fields = ('player', 'game', 'controller')

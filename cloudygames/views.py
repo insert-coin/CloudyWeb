@@ -59,37 +59,46 @@ class GameSessionViewSet(viewsets.ModelViewSet):
     filter_class = GameSessionFilter
     
     def get_queryset(self):
-        _user = self.request.user
-        if(_user.is_staff):
+        user = self.request.user
+        if(user.is_staff):
             return GameSession.objects.all()
-        return GameSession.objects.filter(player=_user)
+        return GameSession.objects.filter(player=user)
 
     def create(self, request):
-        #import ipdb; ipdb.set_trace()
-        _serializer = GameSessionSerializer(data=request.data)
+        serializer = GameSessionSerializer(data=request.data)
 
-        if _serializer.is_valid():
-            _gameid = _serializer.data['game']
-            _game = Game.objects.get(id=_gameid)
-            _user = self.request.user
-            _controller = GameSession.join_game(self, _game)
-            if(_controller == -1):
+        if serializer.is_valid():
+            user = self.request.user
+            gameid = serializer.data['game']
+
+            try:
+                game = Game.objects.get(id=gameid)
+            except Game.DoesNotExist: # Case 1: Invalid game
                 return Response(status=status.HTTP_400_BAD_REQUEST)
 
-            _session = GameSession.objects.create(game=_game, player=_user, controller=_controller)
-            _serializer = GameSessionSerializer(_session)
-            return Response(_serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                session = GameSession.objects.get(player=self.request.user, game=game) # Case 2: Already joined
+            except GameSession.DoesNotExist:
+                controller = GameSession.join_game(self, game)
+                if(controller == -1): # Case 3: Invalid Request
+                    return Response(status=status.HTTP_400_BAD_REQUEST)
 
-    def destroy(self, request, format=None):
-        _data = json.loads(request.body.decode())
+                #Create game session
+                session = GameSession.objects.create(game=game, player=user, controller=controller)
+                serializer = GameSessionSerializer(session)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        _game = Game.objects.get(id=_data['game'])
-        _user = self.request.user
-        _session = GameSession.objects.get(game=_game, player=_user)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        if(GameSession.quit_game(self, _session)):
-            _session.delete()
+    def delete(self, request, format=None):
+        data = json.loads(request.body.decode())
+
+        game = Game.objects.get(id=data['game'])
+        user = self.request.user
+        session = GameSession.objects.get(game=game, player=user)
+
+        if(GameSession.quit_game(self, session)):
+            session.delete()
             return Response(status=status.HTTP_200_OK)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -98,7 +107,9 @@ class PlayerSaveDataViewSet(viewsets.ModelViewSet):
     filter_class = PlayerSaveDataFilter
 
     def get_queryset(self):
-        _user = self.request.user
-        if(_user.is_staff):
+        user = self.request.user
+        if(user.is_staff):
             return GameSession.objects.all()
-        return PlayerSaveData.objects.filter(player=_user)
+        return PlayerSaveData.objects.filter(player=user)
+
+#import ipdb; ipdb.set_trace()

@@ -76,16 +76,16 @@ class CloudyGamesTests(APITestCase):
 
         # Request
         # User1 joins game1 and game2
-        response_create1 = client1.put('/game-session/', {'game': self.game1.id}, format='json')
-        response_create2 = client1.put('/game-session/', {'game': self.game2.id}, format='json')
+        response_create1 = client1.post('/game-session/', data={'player': '', 'game': self.game1.id}, format='json')
+        response_create2 = client1.post('/game-session/', data={'player': '', 'game': self.game2.id}, format='json')
         # Request Get
-        response_read_all = client1.get('/game-session/', {}, format='json')
-        response_read_game1 = client1.get('/game-session/', {'game': self.game1.id}, format='json')
+        response_read_all = client1.get('/game-session/')
+        response_read_game1 = client1.get('/game-session/?game=' + str(self.game1.id))
         # User1 quits game2
-        response_delete = client1.delete('/game-session/', {'game': self.game2.id}, format='json')  
-        response_read_game2 = client1.get('/game-session/', {'game': self.game2.id}, format='json')
+        response_delete = client1.delete('/game-session/?game=' + str(self.game2.id), {'player': '', 'game': self.game2.id}, format='json')
+        response_read_game2 = client1.get('/game-session/?game=' + str(self.game2.id))  
         # User2 fails to join game1
-        response_fail = client2.put('/game-session/', {'game': self.game1.id}, format='json')
+        response_fail = client2.post('/game-session/', data={'player':'', 'game': self.game1.id}, format='json')
         
         # Assert
         # Check expected response

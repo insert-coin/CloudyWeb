@@ -1,22 +1,31 @@
 from rest_framework import serializers
 from accounts.serializers import UserSerializer
+from django.contrib.auth.models import User
 from cloudygames.models import Game, PlayerSaveData, GameSession
 
-class GameSerializer(serializers.HyperlinkedModelSerializer):
+class GameSerializer(serializers.ModelSerializer):
+    users = serializers.SlugRelatedField(
+        many=True,
+        queryset=User.objects.all(),
+        slug_field='username'
+    )
+    
     class Meta:
         model = Game
-        fields = ('name', 'publisher', 'max_limit', 'address', 'users')
+        fields = ('id', 'name', 'publisher', 'max_limit', 'address', 'users')
 
-class PlayerSaveDataSerializer(serializers.HyperlinkedModelSerializer):
+class PlayerSaveDataSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = PlayerSaveData
-        fields = ('saved_file', 'is_autosaved', 'player', 'game')
+        fields = ('id', 'saved_file', 'is_autosaved', 'player', 'game')
 
-class GameSessionSerializer(serializers.HyperlinkedModelSerializer):
-    player = UserSerializer()
-    game = GameSerializer()
+    def create(self, data):
+        data.player = self.request.user
+        return PlayerSaveData.objects.create(data)
+
+class GameSessionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GameSession
-        fields = ('player', 'game', 'controller')
-
+        fields = ('game',)

@@ -21,9 +21,9 @@ from cloudygames import views as cloudygames_views
 
 router = routers.DefaultRouter()
 router.register(r'users', accounts_views.UserViewSet)
-router.register(r'games', cloudygames_views.GameViewSet, 'owned')
-router.register(r'game-session', cloudygames_views.GameSessionViewSet)
-router.register(r'save-data', cloudygames_views.PlayerSaveDataViewSet)
+router.register(r'games', cloudygames_views.GameViewSet, base_name='Game')
+router.register(r'game-session', cloudygames_views.GameSessionViewSet, base_name='GameSession')
+router.register(r'save-data', cloudygames_views.PlayerSaveDataViewSet, base_name = 'PlayerSaveData')
 
 urlpatterns = router.urls + [
     url(r'^admin/', include(admin.site.urls)),

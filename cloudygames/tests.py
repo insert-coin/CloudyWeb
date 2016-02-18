@@ -32,6 +32,21 @@ class CloudyGamesTests(APITestCase):
         self.savedUser1Game1 = PlayerSaveData.objects.create(player=self.user1, game=self.game1, saved_file="game1.txt", is_autosaved=False)
         self.savedUser1Game2 = PlayerSaveData.objects.create(player=self.user1, game=self.game2, saved_file="game2.txt")
 
+    def test_create_game(self):
+    	# Authenticate user1
+        client = APIClient()
+        client.force_authenticate(user=self.user1)
+
+        request = client.post('/games/', data={'name': 'game4', 'publisher': 'pub2', 'max_limit': 4, 'address': 'addr4', 'users': [self.user1.id, self.user2.id]}, format='json')
+        response1 = client.get('/games/')
+        response2 = client.get('/games/?name=game4')
+
+        self.assertEqual(request.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response1.status_code, status.HTTP_200_OK)
+        self.assertEqual(response2.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response1.data), 4)
+        self.assertEqual(len(response2.data), 1)
+
     def test_get_gamelist(self):
         # Authenticate user1
         client = APIClient()
@@ -76,8 +91,8 @@ class CloudyGamesTests(APITestCase):
 
         # Request
         # User1 joins game1 and game2
-        response_create1 = client1.post('/game-session/', data={'player': '', 'game': self.game1.id}, format='json')
-        response_create2 = client1.post('/game-session/', data={'player': '', 'game': self.game2.id}, format='json')
+        response_create1 = client1.put('/game-session/', data={'game': self.game1.id}, format='json')
+        response_create2 = client1.put('/game-session/', data={'game': self.game2.id}, format='json')
         # Request Get
         response_read_all = client1.get('/game-session/')
         response_read_game1 = client1.get('/game-session/?game=' + str(self.game1.id))
@@ -85,7 +100,7 @@ class CloudyGamesTests(APITestCase):
         response_delete = client1.delete('/game-session/?game=' + str(self.game2.id), {'player': '', 'game': self.game2.id}, format='json')
         response_read_game2 = client1.get('/game-session/?game=' + str(self.game2.id))  
         # User2 fails to join game1
-        response_fail = client2.post('/game-session/', data={'player':'', 'game': self.game1.id}, format='json')
+        response_fail = client2.put('/game-session/', data={'game': self.game1.id}, format='json')
         
         # Assert
         # Check expected response

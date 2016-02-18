@@ -64,7 +64,7 @@ class GameSessionViewSet(viewsets.ModelViewSet):
             return GameSession.objects.all()
         return GameSession.objects.filter(player=user)
 
-    def create(self, request):
+    def put(self, request):
         serializer = GameSessionSerializer(data=request.data)
 
         if serializer.is_valid():

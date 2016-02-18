@@ -17,8 +17,8 @@ class Game(models.Model):
     users = models.ManyToManyField(User)
 
 class GameSession(models.Model):
-    player = models.ForeignKey(User, blank=True, null=True)
-    game = models.ForeignKey(Game, blank=True, null=True)
+    player = models.ForeignKey(User)
+    game = models.ForeignKey(Game)
     controller = models.IntegerField(blank=True, null=True)
 
     def join_game(self, gameobj):

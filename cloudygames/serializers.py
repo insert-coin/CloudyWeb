@@ -1,13 +1,19 @@
 from rest_framework import serializers
 from accounts.serializers import UserSerializer
+from django.contrib.auth.models import User
 from cloudygames.models import Game, PlayerSaveData, GameSession
 
 class GameSerializer(serializers.ModelSerializer):
+    users = serializers.SlugRelatedField(
+        many=True,
+        queryset=User.objects.all(),
+        slug_field='username'
+    )
     
     class Meta:
         model = Game
         fields = ('id', 'name', 'publisher', 'max_limit', 'address', 'users')
-        extra_kwargs = {'users': {'many': True},}
+    #    extra_kwargs = {'users': {'many': True},}
 
 class PlayerSaveDataSerializer(serializers.ModelSerializer):
 

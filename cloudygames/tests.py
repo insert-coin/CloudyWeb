@@ -33,11 +33,11 @@ class CloudyGamesTests(APITestCase):
         self.savedUser1Game2 = PlayerSaveData.objects.create(player=self.user1, game=self.game2, saved_file="game2.txt")
 
     def test_create_game(self):
-    	# Authenticate user1
+        # Authenticate user1
         client = APIClient()
         client.force_authenticate(user=self.user1)
 
-        request = client.post('/games/', data={'name': 'game4', 'publisher': 'pub2', 'max_limit': 4, 'address': 'addr4', 'users': [self.user1.id, self.user2.id]}, format='json')
+        request = client.post('/games/', data={'name': 'game4', 'publisher': 'pub2', 'max_limit': 4, 'address': 'addr4', 'users': [self.user1.username, self.user2.username]}, format='json')
         response1 = client.get('/games/')
         response2 = client.get('/games/?name=game4')
 

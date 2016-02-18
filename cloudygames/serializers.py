@@ -13,7 +13,6 @@ class GameSerializer(serializers.ModelSerializer):
     class Meta:
         model = Game
         fields = ('id', 'name', 'publisher', 'max_limit', 'address', 'users')
-    #    extra_kwargs = {'users': {'many': True},}
 
 class PlayerSaveDataSerializer(serializers.ModelSerializer):
 

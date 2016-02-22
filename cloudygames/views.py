@@ -65,22 +65,18 @@ class GameSessionViewSet(viewsets.ModelViewSet):
         return GameSession.objects.filter(player=user)
 
     def put(self, request):
-        serializer = GameSessionSerializer(data=request.data)
+        import ipdb; ipdb.set_trace()
+        serializer = GameSessionSerializer(data=json.loads(request.body.decode('utf-8')))
 
         if serializer.is_valid():
             user = self.request.user
-            gameid = serializer.data['game']
+            game = serializer.validated_data['game']
 
             try:
-                game = Game.objects.get(id=gameid)
-            except Game.DoesNotExist: # Case 1: Invalid game
-                return Response(status=status.HTTP_400_BAD_REQUEST)
-
-            try:
-                session = GameSession.objects.get(player=self.request.user, game=game) # Case 2: Already joined
+                session = GameSession.objects.get(player=self.request.user, game=game) # Case 1: Already joined
             except GameSession.DoesNotExist:
                 controller = GameSession.join_game(self, game)
-                if(controller == -1): # Case 3: Invalid Request
+                if(controller == -1): # Case 2: Invalid Request
                     return Response(status=status.HTTP_400_BAD_REQUEST)
 
                 #Create game session

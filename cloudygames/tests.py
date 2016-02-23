@@ -20,7 +20,7 @@ class CloudyGamesTests(APITestCase):
         self.user1 = User.objects.create(username="user1", password="user1", email="user1@email.com", first_name="firstname", last_name="lastname")
         self.user2 = User.objects.create(username="user2", password="user2", email="user2@email.com", first_name="firstname", last_name="lastname")
 
-        # Games
+        # GameSerializer
         self.game1 = Game.objects.create(name="game1", publisher="pub1", max_limit=1, address="addr1")
         self.game2 = Game.objects.create(name="game2", publisher="pub1", max_limit=1, address="addr2")
         self.game3 = Game.objects.create(name="game3", publisher="pub1", max_limit=1, address="addr3")
@@ -81,6 +81,20 @@ class CloudyGamesTests(APITestCase):
         self.assertEqual(response2.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response1.data), 2)
         self.assertEqual(len(response2.data), 1)
+
+    def test_delete_game(self):
+        # Authenticate user1
+        client = APIClient()
+        client.force_authenticate(user=self.user1)
+
+        request = client.delete('/games/3/')
+        response1 = client.get('/games/')
+        response2 = client.get('/games/?name=game3')
+
+        self.assertEqual(request.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(response1.status_code, status.HTTP_200_OK)
+        self.assertEqual(response2.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response1.data), 2)
 
     def test_join_quit_game(self):
         # Authenticate users

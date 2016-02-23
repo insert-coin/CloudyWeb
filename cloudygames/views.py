@@ -26,7 +26,7 @@ class GameFilter(django_filters.FilterSet):
 
 class GameSessionFilter(django_filters.FilterSet):
     game = django_filters.CharFilter(name='game__id')
-    player = django_filters.CharFilter(name='player_username')
+    player = django_filters.CharFilter(name='player__username')
 
     class Meta:
         model = GameSession
@@ -34,7 +34,7 @@ class GameSessionFilter(django_filters.FilterSet):
 
 class PlayerSaveDataFilter(django_filters.FilterSet):
     game = django_filters.CharFilter(name='game__id')
-    player = django_filters.CharFilter(name='player_username')
+    player = django_filters.CharFilter(name='player__username')
 
     class Meta:
         model = PlayerSaveData
@@ -65,7 +65,6 @@ class GameSessionViewSet(viewsets.ModelViewSet):
         return GameSession.objects.filter(player=user)
 
     def put(self, request):
-        import ipdb; ipdb.set_trace()
         serializer = GameSessionSerializer(data=json.loads(request.body.decode('utf-8')))
 
         if serializer.is_valid():
@@ -105,7 +104,7 @@ class PlayerSaveDataViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if(user.is_staff):
-            return GameSession.objects.all()
+            return PlayerSaveData.objects.all()
         return PlayerSaveData.objects.filter(player=user)
 
 #import ipdb; ipdb.set_trace()

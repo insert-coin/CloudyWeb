@@ -10,39 +10,31 @@ class GameSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'publisher', 'max_limit', 'address')
 
 class GameOwnershipSerializer(serializers.ModelSerializer):
-    user = serializers.SlugRelatedField(queryset=User.objects.all(), slug_field='username', required=False)
+    user = serializers.SlugRelatedField(queryset=User.objects.all(), slug_field='username')
 
     class Meta:
         model = GameOwnership
-        fields = ('user', 'game')
-
-    def get_validation_exclusions(self):
-        exclusions = super(GameOwnershipSerializer, self).get_validation_exclusions()
-        return exclusions + ['user']
+        fields = ('id', 'user', 'game')
 
 class GameSessionSerializer(serializers.ModelSerializer):
-    player = serializers.SlugRelatedField(
-        queryset = User.objects.all(),
-        slug_field = 'username',
-        required = False,
-    )
+    user = serializers.SlugRelatedField(queryset = User.objects.all(),slug_field = 'username')
     controller = serializers.IntegerField(required=False)
 
     class Meta:
         model = GameSession
-        fields = ('id', 'player', 'game', 'controller')
+        fields = ('id', 'user', 'game', 'controller')
 
     def get_validation_exclusions(self):
         exclusions = super(GameSessionSerializer, self).get_validation_exclusions()
-        return exclusions + ['player', 'controller']
+        return exclusions + ['controller']
 
 class PlayerSaveDataSerializer(serializers.ModelSerializer):
-    player = serializers.SlugRelatedField(queryset = User.objects.all(), slug_field = 'username')
+    user = serializers.SlugRelatedField(queryset = User.objects.all(), slug_field = 'username')
     is_autosaved = serializers.BooleanField(required=False, default=False)
 
     class Meta:
         model = PlayerSaveData
-        fields = ('id', 'saved_file', 'is_autosaved', 'player', 'game')
+        fields = ('id', 'saved_file', 'is_autosaved', 'user', 'game')
 
     def get_validation_exclusions(self):
         exclusions = super(PlayerSaveDataSerializer, self).get_validation_exclusions()

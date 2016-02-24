@@ -56,7 +56,7 @@ class GameSession(models.Model):
 
 class PlayerSaveData(models.Model):
     saved_file = models.CharField(max_length=45)
-    is_autosaved = models.BooleanField(default=True)
+    is_autosaved = models.BooleanField(default=False)
     user = models.ForeignKey(User)
     game = models.ForeignKey(Game)
 

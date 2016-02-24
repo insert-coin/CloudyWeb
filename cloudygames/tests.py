@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.test import APITestCase, force_authenticate, APIClient
 
-from cloudygames.models import Game, PlayerSaveData
+from cloudygames.models import Game, PlayerSaveData, GameOwnership
 from cloudygames.serializers import GameSerializer
 
 import json
@@ -24,8 +24,9 @@ class CloudyGamesTests(APITestCase):
         self.game1 = Game.objects.create(name="game1", publisher="pub1", max_limit=1, address="addr1")
         self.game2 = Game.objects.create(name="game2", publisher="pub1", max_limit=1, address="addr2")
         self.game3 = Game.objects.create(name="game3", publisher="pub1", max_limit=1, address="addr3")
-        self.game1.users.add(self.user1, self.user2)
-        self.game2.users.add(self.user1)
+        GameOwnership.objects.create(user=self.user1, game=self.game1)
+        GameOwnership.objects.create(user=self.user1, game=self.game2)
+        GameOwnership.objects.create(user=self.user2, game=self.game1)
 
         # PlayerSaveData
         self.savedUser1Game1auto = PlayerSaveData.objects.create(player=self.user1, game=self.game1, saved_file="game1auto.txt")

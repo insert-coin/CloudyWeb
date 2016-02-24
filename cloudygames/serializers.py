@@ -1,18 +1,24 @@
 from rest_framework import serializers
 from accounts.serializers import UserSerializer
 from django.contrib.auth.models import User
-from cloudygames.models import Game, PlayerSaveData, GameSession
+from cloudygames.models import Game, PlayerSaveData, GameSession, GameOwnership
 
 class GameSerializer(serializers.ModelSerializer):
-    users = serializers.SlugRelatedField(
-        many=True,
-        queryset=User.objects.all(),
-        slug_field='username'
-    )
     
     class Meta:
         model = Game
-        fields = ('id', 'name', 'publisher', 'max_limit', 'address', 'users')
+        fields = ('id', 'name', 'publisher', 'max_limit', 'address')
+
+class GameOwnershipSerializer(serializers.ModelSerializer):
+    user = serializers.SlugRelatedField(queryset=User.objects.all(), slug_field='username', required=False)
+
+    class Meta:
+        model = GameOwnership
+        fields = ('user', 'game')
+
+    def get_validation_exclusions(self):
+        exclusions = super(GameOwnershipSerializer, self).get_validation_exclusions()
+        return exclusions + ['user']
 
 class GameSessionSerializer(serializers.ModelSerializer):
     player = serializers.SlugRelatedField(
@@ -28,9 +34,10 @@ class GameSessionSerializer(serializers.ModelSerializer):
 
     def get_validation_exclusions(self):
         exclusions = super(GameSessionSerializer, self).get_validation_exclusions()
-        return exclusions + ['player', 'game']
+        return exclusions + ['player', 'controller']
 
 class PlayerSaveDataSerializer(serializers.ModelSerializer):
+    player = serializers.SlugRelatedField(queryset = User.objects.all(), slug_field = 'username')
     is_autosaved = serializers.BooleanField(required=False, default=False)
 
     class Meta:

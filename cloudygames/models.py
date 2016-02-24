@@ -14,12 +14,15 @@ class Game(models.Model):
     publisher = models.CharField(max_length=45)
     max_limit = models.IntegerField()
     address = models.CharField(max_length=45)
-    users = models.ManyToManyField(User)
+
+class GameOwnership(models.Model):
+    user = models.ForeignKey(User)
+    game = models.ForeignKey(Game)
 
 class GameSession(models.Model):
-    player = models.ForeignKey(User, blank=True)
+    player = models.ForeignKey(User)
     game = models.ForeignKey(Game)
-    controller = models.IntegerField(blank=True)
+    controller = models.IntegerField()
 
     def join_game(self, gameobj):
         controllerid = -1

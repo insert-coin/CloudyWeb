@@ -22,6 +22,7 @@ from cloudygames import views as cloudygames_views
 router = routers.DefaultRouter()
 router.register(r'users', accounts_views.UserViewSet)
 router.register(r'games', cloudygames_views.GameViewSet, base_name='Game')
+router.register(r'game-ownership', cloudygames_views.GameOwnershipViewSet, base_name='GameOwnership')
 router.register(r'game-session', cloudygames_views.GameSessionViewSet, base_name='GameSession')
 router.register(r'save-data', cloudygames_views.PlayerSaveDataViewSet, base_name = 'PlayerSaveData')
 

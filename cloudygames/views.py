@@ -5,8 +5,8 @@ from rest_framework import viewsets, generics, status, filters
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from cloudygames.serializers import GameSerializer, GameSessionSerializer, PlayerSaveDataSerializer
-from cloudygames.models import Game, GameSession, PlayerSaveData
+from cloudygames.serializers import GameSerializer, GameSessionSerializer, PlayerSaveDataSerializer, GameOwnershipSerializer
+from cloudygames.models import Game, GameSession, PlayerSaveData, GameOwnership
 
 import django_filters
 import json
@@ -16,13 +16,19 @@ import json
 
 
 class GameFilter(django_filters.FilterSet):
-    users = django_filters.CharFilter(name='users__username')
 
     class Meta:
         model = Game
-        fields = ['id', 'name', 'publisher', 'users']
+        fields = ['id', 'name', 'publisher']
         order_by = ['name']
         read_only_fields = ('id',)
+
+class GameOwnershipFilter(django_filters.FilterSet):
+	user = django_filters.CharFilter(name='user_username')
+
+	class Meta:
+		model = GameOwnership
+		fields = ['user', 'game']
 
 class GameSessionFilter(django_filters.FilterSet):
     game = django_filters.CharFilter(name='game__id')
@@ -50,9 +56,20 @@ class GameViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         is_owned = self.request.query_params.get('owned', 0)
         if is_owned == '1':
-            _user = self.request.user
-            return Game.objects.filter(users=_user)
+            user = self.request.user
+            owned_games_id = GameOwnership.objects.filter(user=user).values_list('game__id', flat=True)
+            return Game.objects.filter(pk__in=owned_games_id)
         return Game.objects.all().order_by('name')
+
+class GameOwnershipViewSet(viewsets.ModelViewSet):
+	serializer_class = GameOwnershipSerializer
+	filter_class = GameOwnershipFilter
+
+	def get_queryset(self):
+		user = self.request.user
+		if(user.is_staff):
+			return GameOwnership.objects.all()
+		return GameOwnership.objects.filter(user=user)
 
 class GameSessionViewSet(viewsets.ModelViewSet):
     serializer_class = GameSessionSerializer

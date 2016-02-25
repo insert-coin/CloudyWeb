@@ -34,7 +34,8 @@ class GameSession(models.Model):
         controllerid = -1
         try:
             controllers = range(gameobj.max_limit)
-            occupied = GameSession.objects.filter(game=gameobj).values_list('controller', flat=True)
+            occupied = GameSession.objects.filter(game=gameobj). \
+                       values_list('controller', flat=True)
             available = list(set(controllers)-set(occupied))
             controllerid = available[0]
         except IndexError:

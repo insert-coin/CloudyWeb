@@ -1,14 +1,29 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.core import serializers
 
 from rest_framework import viewsets, generics, status, filters
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from cloudygames.serializers import GameSerializer, GameSessionSerializer, PlayerSaveDataSerializer, GameOwnershipSerializer
-from cloudygames.models import Game, GameSession, PlayerSaveData, GameOwnership
-from cloudygames.permissions import OperatorOnly, UserIsOwnerOrOperator, UserIsOwnerOrOperatorExceptUpdate
-from cloudygames.filters import GameFilter, GameOwnershipFilter, GameSessionFilter, PlayerSaveDataFilter
+from cloudygames.serializers \
+    import GameSerializer, \
+           GameSessionSerializer, \
+           PlayerSaveDataSerializer, \
+           GameOwnershipSerializer
+from cloudygames.models \
+    import Game, \
+           GameSession, \
+           PlayerSaveData, \
+           GameOwnership
+from cloudygames.permissions \
+    import OperatorOnly, \
+           UserIsOwnerOrOperator, \
+           UserIsOwnerOrOperatorExceptUpdate
+from cloudygames.filters \
+    import GameFilter, \
+           GameOwnershipFilter, \
+           GameSessionFilter, \
+           PlayerSaveDataFilter
 
 import json
 
@@ -21,7 +36,8 @@ class GameViewSet(viewsets.ModelViewSet):
         is_owned = self.request.query_params.get('owned', 0)
         if is_owned == '1':
             user = self.request.user
-            owned_games_id = GameOwnership.objects.filter(user=user).values_list('game__id', flat=True)
+            owned_games_id = GameOwnership.objects.filter(
+                user=user).values_list('game__id', flat=True)
             return Game.objects.filter(pk__in=owned_games_id)
         return Game.objects.all().order_by('name')
 
@@ -54,23 +70,33 @@ class GameSessionViewSet(viewsets.ModelViewSet):
             game = serializer.validated_data['game']
             user = serializer.validated_data['user']
 
-            if game.id in GameOwnership.objects.filter(user=user).values_list('game__id', flat=True): # User owns the game
+            if game.id in GameOwnership.objects.filter(
+                user=user).values_list('game__id', flat=True):
+                # User owns the game
                 controller = GameSession.join_game(self, game)
                 if(controller != -1):
                     #Create game session
-                    session = GameSession.objects.create(game=game, user=user, controller=controller)
+                    session = GameSession.objects.create(
+                        game=game,
+                        user=user,
+                        controller=controller
+                    )
                     serializer = GameSessionSerializer(session)
-                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                    return Response(
+                        serializer.data,
+                        status=status.HTTP_201_CREATED
+                    )
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, *args, **kwargs):
-        try:
-        	if(self.request.user.is_staff):
-        		session = GameSession.objects.get(id=kwargs['pk'])
-        	else:
-        		session = GameSession.objects.filter(user=self.request.user).get(id=kwargs['pk'])
-        except GameSession.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        if(self.request.user.is_staff):
+            session = get_object_or_404(GameSession, id=kwargs['pk'])
+        else:
+            session = get_object_or_404(
+                GameSession,
+                user=self.request.user,
+                id=kwargs['pk']
+            )
 
         if(GameSession.quit_game(self, session)):
             session.delete()

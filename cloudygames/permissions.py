@@ -26,9 +26,10 @@ class UserIsOwnerOrOperator(permissions.BasePermission):
     # destroy: own or operator only
 
     def has_permission(self, request, view):
-        #import ipdb; ipdb.set_trace()
         if view.action == 'create':
-            return request.user.is_authenticated() and ((request.user.username == request.data['user']) or request.user.is_staff)
+            return request.user.is_authenticated() and \
+            ((request.user.username == request.data['user']) or \
+                request.user.is_staff)
         return request.user.is_authenticated()
 
     def has_object_permission(self, request, view, obj):
@@ -43,7 +44,9 @@ class UserIsOwnerOrOperatorExceptUpdate(permissions.BasePermission):
 
     def has_permission(self, request, view):
         if view.action == 'create':
-            return request.user.is_authenticated() and ((request.user.username == request.data['user']) or request.user.is_staff)
+            return request.user.is_authenticated() and \
+            ((request.user.username == request.data['user']) or \
+                request.user.is_staff)
         elif view.action in ['update', 'partial_update']:
             return False
         return request.user.is_authenticated()

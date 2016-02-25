@@ -1,6 +1,7 @@
 import django_filters
 
-from cloudygames.models import Game, GameSession, PlayerSaveData, GameOwnership
+from cloudygames.models \
+    import Game, GameSession, PlayerSaveData, GameOwnership
 
 class GameFilter(django_filters.FilterSet):
 

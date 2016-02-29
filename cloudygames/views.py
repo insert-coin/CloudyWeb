@@ -1,115 +1,117 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.core import serializers
 
 from rest_framework import viewsets, generics, status, filters
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from cloudygames.serializers import GameSerializer, GameSessionSerializer, PlayerSaveDataSerializer
-from cloudygames.models import Game, GameSession, PlayerSaveData
+from cloudygames.serializers \
+    import GameSerializer, \
+           GameSessionSerializer, \
+           PlayerSaveDataSerializer, \
+           GameOwnershipSerializer
+from cloudygames.models \
+    import Game, \
+           GameSession, \
+           PlayerSaveData, \
+           GameOwnership
+from cloudygames.permissions \
+    import OperatorOnly, \
+           UserIsOwnerOrOperator, \
+           UserIsOwnerOrOperatorExceptUpdate
+from cloudygames.filters \
+    import GameFilter, \
+           GameOwnershipFilter, \
+           GameSessionFilter, \
+           PlayerSaveDataFilter
 
-import django_filters
 import json
-
-
-######################## Filter ############################
-
-
-class GameFilter(django_filters.FilterSet):
-    users = django_filters.CharFilter(name='users__username')
-
-    class Meta:
-        model = Game
-        fields = ['id', 'name', 'publisher', 'users']
-        order_by = ['name']
-        read_only_fields = ('id',)
-
-class GameSessionFilter(django_filters.FilterSet):
-    game = django_filters.CharFilter(name='game__id')
-    player = django_filters.CharFilter(name='player_username')
-
-    class Meta:
-        model = GameSession
-        fields = ['game', 'player']
-
-class PlayerSaveDataFilter(django_filters.FilterSet):
-    game = django_filters.CharFilter(name='game__id')
-    player = django_filters.CharFilter(name='player_username')
-
-    class Meta:
-        model = PlayerSaveData
-        fields = ['game', 'player']
-
-
-######################## ViewSet ############################
 
 class GameViewSet(viewsets.ModelViewSet):
     serializer_class = GameSerializer
     filter_class = GameFilter
+    permission_classes = (OperatorOnly,)
 
     def get_queryset(self):
         is_owned = self.request.query_params.get('owned', 0)
         if is_owned == '1':
-            _user = self.request.user
-            return Game.objects.filter(users=_user)
+            user = self.request.user
+            owned_games_id = GameOwnership.objects.filter(
+                user=user).values_list('game__id', flat=True)
+            return Game.objects.filter(pk__in=owned_games_id)
         return Game.objects.all().order_by('name')
+
+class GameOwnershipViewSet(viewsets.ModelViewSet):
+    serializer_class = GameOwnershipSerializer
+    filter_class = GameOwnershipFilter
+    permission_classes = (UserIsOwnerOrOperatorExceptUpdate,)
+
+    def get_queryset(self):
+        user = self.request.user
+        if(user.is_staff):
+            return GameOwnership.objects.all()
+        return GameOwnership.objects.filter(user=user)
 
 class GameSessionViewSet(viewsets.ModelViewSet):
     serializer_class = GameSessionSerializer
     filter_class = GameSessionFilter
+    permission_classes = (UserIsOwnerOrOperatorExceptUpdate,)
     
     def get_queryset(self):
         user = self.request.user
         if(user.is_staff):
             return GameSession.objects.all()
-        return GameSession.objects.filter(player=user)
+        return GameSession.objects.filter(user=user)
 
-    def put(self, request):
+    def create(self, request):
         serializer = GameSessionSerializer(data=request.data)
 
         if serializer.is_valid():
-            user = self.request.user
-            gameid = serializer.data['game']
+            game = serializer.validated_data['game']
+            user = serializer.validated_data['user']
 
-            try:
-                game = Game.objects.get(id=gameid)
-            except Game.DoesNotExist: # Case 1: Invalid game
-                return Response(status=status.HTTP_400_BAD_REQUEST)
-
-            try:
-                session = GameSession.objects.get(player=self.request.user, game=game) # Case 2: Already joined
-            except GameSession.DoesNotExist:
+            if game.id in GameOwnership.objects.filter(
+                user=user).values_list('game__id', flat=True):
+                # User owns the game
                 controller = GameSession.join_game(self, game)
-                if(controller == -1): # Case 3: Invalid Request
-                    return Response(status=status.HTTP_400_BAD_REQUEST)
-
-                #Create game session
-                session = GameSession.objects.create(game=game, player=user, controller=controller)
-                serializer = GameSessionSerializer(session)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-
+                if(controller != -1):
+                    #Create game session
+                    session = GameSession.objects.create(
+                        game=game,
+                        user=user,
+                        controller=controller
+                    )
+                    serializer = GameSessionSerializer(session)
+                    return Response(
+                        serializer.data,
+                        status=status.HTTP_201_CREATED
+                    )
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, format=None):
-        data = json.loads(request.body.decode())
-
-        game = Game.objects.get(id=data['game'])
-        user = self.request.user
-        session = GameSession.objects.get(game=game, player=user)
+    def destroy(self, request, *args, **kwargs):
+        if(self.request.user.is_staff):
+            session = get_object_or_404(GameSession, id=kwargs['pk'])
+        else:
+            session = get_object_or_404(
+                GameSession,
+                user=self.request.user,
+                id=kwargs['pk']
+            )
 
         if(GameSession.quit_game(self, session)):
             session.delete()
-            return Response(status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 class PlayerSaveDataViewSet(viewsets.ModelViewSet):
     serializer_class = PlayerSaveDataSerializer
     filter_class = PlayerSaveDataFilter
+    permission_classes = (UserIsOwnerOrOperator,)
 
     def get_queryset(self):
         user = self.request.user
         if(user.is_staff):
-            return GameSession.objects.all()
-        return PlayerSaveData.objects.filter(player=user)
+            return PlayerSaveData.objects.all()
+        return PlayerSaveData.objects.filter(user=user)
 
 #import ipdb; ipdb.set_trace()

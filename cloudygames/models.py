@@ -14,18 +14,28 @@ class Game(models.Model):
     publisher = models.CharField(max_length=45)
     max_limit = models.IntegerField()
     address = models.CharField(max_length=45)
-    users = models.ManyToManyField(User)
+
+class GameOwnership(models.Model):
+    user = models.ForeignKey(User)
+    game = models.ForeignKey(Game)
+
+    class Meta:
+        unique_together = ['user', 'game']
 
 class GameSession(models.Model):
-    player = models.ForeignKey(User)
+    user = models.ForeignKey(User)
     game = models.ForeignKey(Game)
-    controller = models.IntegerField(blank=True, null=True)
+    controller = models.IntegerField()
+
+    class Meta:
+        unique_together = ['user', 'game']
 
     def join_game(self, gameobj):
         controllerid = -1
         try:
             controllers = range(gameobj.max_limit)
-            occupied = GameSession.objects.filter(game=gameobj).values_list('controller', flat=True)
+            occupied = GameSession.objects.filter(game=gameobj). \
+                       values_list('controller', flat=True)
             available = list(set(controllers)-set(occupied))
             controllerid = available[0]
         except IndexError:
@@ -47,8 +57,8 @@ class GameSession(models.Model):
 
 class PlayerSaveData(models.Model):
     saved_file = models.CharField(max_length=45)
-    is_autosaved = models.BooleanField(default=True)
-    player = models.ForeignKey(User)
+    is_autosaved = models.BooleanField(default=False)
+    user = models.ForeignKey(User)
     game = models.ForeignKey(Game)
 
 # Need to add for genres in future sprints

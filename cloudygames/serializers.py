@@ -1,31 +1,53 @@
 from rest_framework import serializers
 from accounts.serializers import UserSerializer
 from django.contrib.auth.models import User
-from cloudygames.models import Game, PlayerSaveData, GameSession
+from cloudygames.models \
+    import Game, PlayerSaveData, GameSession, GameOwnership
 
 class GameSerializer(serializers.ModelSerializer):
-    users = serializers.SlugRelatedField(
-        many=True,
-        queryset=User.objects.all(),
-        slug_field='username'
-    )
     
     class Meta:
         model = Game
-        fields = ('id', 'name', 'publisher', 'max_limit', 'address', 'users')
+        fields = ('id', 'name', 'publisher', 'max_limit', 'address')
 
-class PlayerSaveDataSerializer(serializers.ModelSerializer):
+class GameOwnershipSerializer(serializers.ModelSerializer):
+    user = serializers.SlugRelatedField(
+        queryset=User.objects.all(),
+        slug_field='username'
+    )
 
     class Meta:
-        model = PlayerSaveData
-        fields = ('id', 'saved_file', 'is_autosaved', 'player', 'game')
-
-    def create(self, data):
-        data.player = self.request.user
-        return PlayerSaveData.objects.create(data)
+        model = GameOwnership
+        fields = ('id', 'user', 'game')
 
 class GameSessionSerializer(serializers.ModelSerializer):
+    user = serializers.SlugRelatedField(
+        queryset = User.objects.all(),
+        slug_field = 'username'
+    )
+    controller = serializers.IntegerField(required=False)
 
     class Meta:
         model = GameSession
-        fields = ('game',)
+        fields = ('id', 'user', 'game', 'controller')
+
+    def get_validation_exclusions(self):
+        exclusions = super(GameSessionSerializer, self). \
+                     get_validation_exclusions()
+        return exclusions + ['controller']
+
+class PlayerSaveDataSerializer(serializers.ModelSerializer):
+    user = serializers.SlugRelatedField(
+        queryset = User.objects.all(),
+        slug_field = 'username'
+    )
+    is_autosaved = serializers.BooleanField(required=False, default=False)
+
+    class Meta:
+        model = PlayerSaveData
+        fields = ('id', 'saved_file', 'is_autosaved', 'user', 'game')
+
+    def get_validation_exclusions(self):
+        exclusions = super(PlayerSaveDataSerializer, self). \
+                     get_validation_exclusions()
+        return exclusions + ['is_autosaved']

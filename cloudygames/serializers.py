@@ -26,15 +26,16 @@ class GameSessionSerializer(serializers.ModelSerializer):
         slug_field = 'username'
     )
     controller = serializers.IntegerField(required=False)
+    streaming_port = serializers.CharField(required=False)
 
     class Meta:
         model = GameSession
-        fields = ('id', 'user', 'game', 'controller')
+        fields = ('id', 'user', 'game', 'controller', 'streaming_port')
 
     def get_validation_exclusions(self):
         exclusions = super(GameSessionSerializer, self). \
                      get_validation_exclusions()
-        return exclusions + ['controller']
+        return exclusions + ['controller', 'streaming_port']
 
 class PlayerSaveDataSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(

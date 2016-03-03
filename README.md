@@ -132,7 +132,7 @@ python manage.py test
                  '/game-session/?user=user1'
                  '/game-session/?game=3'
             access right: operator or their own
-            returns {'id', 'user', 'game', 'controller'}
+            returns {'id', 'user', 'game', 'controller', 'streaming_port'}
         # Quit Game
             request method: DELETE
             url: '/game-session/3/'

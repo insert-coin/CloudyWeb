@@ -26,7 +26,7 @@ class GameSessionSerializer(serializers.ModelSerializer):
         slug_field = 'username'
     )
     controller = serializers.IntegerField(required=False)
-    streaming_port = serializers.CharField(required=False)
+    streaming_port = serializers.IntegerField(required=False)
 
     class Meta:
         model = GameSession

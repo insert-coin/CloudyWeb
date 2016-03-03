@@ -26,7 +26,7 @@ class GameSession(models.Model):
     user = models.ForeignKey(User)
     game = models.ForeignKey(Game)
     controller = models.IntegerField()
-    streaming_port = models.CharField(max_length=5)
+    streaming_port = models.IntegerField()
 
     class Meta:
         unique_together = ['user', 'game']
@@ -49,7 +49,7 @@ class GameSession(models.Model):
             command = JOIN_CMD + str(data['controllerid']).zfill(4)
             result = utils.connect_to_CPP(command)
             if(result != ERROR_MSG):
-                data['streaming_port'] = str(data['controllerid'] + PORT_NUM)
+                data['streaming_port'] = data['controllerid'] + PORT_NUM
         return data
 
 class PlayerSaveData(models.Model):

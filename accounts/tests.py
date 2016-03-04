@@ -26,7 +26,7 @@ class AccountTest(drf_test.APITestCase):
         self.assertEqual(User.objects.last().username, 'foo')
         self.assertEqual(Token.objects.count(), 1)
 
-    def test_token_auth(self):
+    def test_token_auth_regeneration(self):
 
         url = reverse('token-auth')
         data = {
@@ -34,11 +34,14 @@ class AccountTest(drf_test.APITestCase):
             'password': 'bar',
         }
         user = User.objects.create_user(**data)
+        old_token = user.auth_token.key
 
         response = self.client.post(url, data, format='json')
 
+        new_token = user.auth_token.key
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, {'token': user.auth_token.key})
+        self.assertEqual(response.data, {'token': new_token})
+        self.assertNotEqual(new_token, old_token)
 
     def test_user_resource_by_anonymous(self):
         url = reverse('user-list')

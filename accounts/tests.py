@@ -38,6 +38,7 @@ class AccountTest(drf_test.APITestCase):
 
         response = self.client.post(url, data, format='json')
 
+        user = User.objects.get(pk=user.pk)
         new_token = user.auth_token.key
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, {'token': new_token})

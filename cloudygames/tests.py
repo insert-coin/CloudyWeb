@@ -409,20 +409,18 @@ class CloudyGamesTests(APITestCase):
             'game': self.game1.id
         }, format='json')
         response_create2 = client1.post('/game-session/', data={
-            'user': 'user1', 'game': self.game2.id}, format='json')
+            'user': 'user1', 
+            'game': self.game2.id
+        }, format='json')
         response_create3 = client1.post('/game-session/', data={
-            'user': 'user1',
-            'game': self.game3.id
-        }, format='json') # Ownership problem
-        response_create4 = client1.post('/game-session/', data={
             'user': 'user1',
             'game': self.game1.id
         }, format='json') # Duplicate
-        response_create5 = client1.post('/game-session/', data={
+        response_create4 = client1.post('/game-session/', data={
             'user': 'user2',
             'game': self.game3.id
         }, format='json')
-        response_create6 = client1.post('/game-session/', data={
+        response_create5 = client1.post('/game-session/', data={
             'user': 'user2',
             'game': '5'
         }, format='json') # Not a valid game id
@@ -431,14 +429,18 @@ class CloudyGamesTests(APITestCase):
         response_read_game1 = client1.get('/game-session/?game=1')
         response_read_user1 = client1.get('/game-session/?user=user1')
         # User 2 fails to join
-        response_create7 = client2.post('/game-session/', data={
+        response_create6 = client2.post('/game-session/', data={
             'user': 'user2',
             'game': self.game1.id
         }, format='json') # Limit exceeded
-        response_create8 = client2.post('/game-session/', data={
+        response_create7 = client2.post('/game-session/', data={
             'user': 'user1',
             'game': self.game1.id
         }, format='json') # Access denied
+        response_create8 = client2.post('/game-session/', data={
+            'user': 'user2',
+            'game': self.game2.id
+        }, format='json') # Game ownership problem
 
         self.assertEqual(response_create1.status_code, \
             status.HTTP_201_CREATED)
@@ -447,15 +449,15 @@ class CloudyGamesTests(APITestCase):
         self.assertEqual(response_create3.status_code, \
             status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_create4.status_code, \
-            status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response_create5.status_code, \
             status.HTTP_201_CREATED)
+        self.assertEqual(response_create5.status_code, \
+            status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_create6.status_code, \
             status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_create7.status_code, \
-            status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response_create8.status_code, \
             status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response_create8.status_code, \
+            status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_read_all.status_code, status.HTTP_200_OK)
         self.assertEqual(response_read_game1.status_code, status.HTTP_200_OK)
         self.assertEqual(response_read_user1.status_code, status.HTTP_200_OK)

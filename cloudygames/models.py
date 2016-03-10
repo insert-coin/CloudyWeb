@@ -19,13 +19,15 @@ class Game(models.Model):
     max_limit = models.IntegerField()
     address = models.CharField(max_length=45)
     thumbnail = ProcessedImageField(
-        upload_to = 'game_thumbnails',
+        upload_to = 'thumbnails',
         processors = [ResizeToFill(100, 100)],
         format = 'PNG',
         options = {'quality': 60},
-        default = '/game_thumbnails/default.png',
+        default = 'settings.MEDIA_ROOT/thumbnails/default.png',
     )
 
+    def __str__(self): # Python object representation
+        return self.name
 
 class GameOwnership(models.Model):
     user = models.ForeignKey(User)

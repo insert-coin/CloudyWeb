@@ -12,9 +12,10 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name='game',
-            name='thumbnail',
-            field=models.ImageField(upload_to='game_thumbnails', default='/game_thumbnails/default.png'),
+            model_name='gamesession',
+            name='streaming_port',
+            field=models.CharField(max_length=5, default=30000),
+            preserve_default=False,
         ),
         migrations.AlterField(
             model_name='playersavedata',

@@ -1,6 +1,6 @@
 from rest_framework import permissions
 
-class OperatorOnly(permissions.BasePermission):
+class OperatorOnlyButPublicReadAccess(permissions.BasePermission):
 
     # create: operator only
     # list & retrieve: all authenticated users
@@ -9,7 +9,7 @@ class OperatorOnly(permissions.BasePermission):
 
     def has_permission(self, request, view):
         if view.action in ['list', 'retrieve']:
-            return request.user.is_authenticated()
+            return True
         elif view.action in ['create', 'update', 'partial_update', 'destroy']:
             return request.user.is_authenticated() and request.user.is_staff
         else:
@@ -28,7 +28,7 @@ class UserIsOwnerOrOperator(permissions.BasePermission):
     def has_permission(self, request, view):
         if view.action == 'create':
             return request.user.is_authenticated() and \
-            ((request.user.username == request.data['user']) or \
+            ((request.user.username == request.data.get('user')) or \
                 request.user.is_staff)
         return request.user.is_authenticated()
 
@@ -43,9 +43,9 @@ class UserIsOwnerOrOperatorExceptUpdate(permissions.BasePermission):
     # destroy: own or operator only
 
     def has_permission(self, request, view):
-        if view.action == 'create':
+        if request.method == 'POST' and view.action == 'create':
             return request.user.is_authenticated() and \
-            ((request.user.username == request.data['user']) or \
+            ((request.user.username == request.data.get('user')) or \
                 request.user.is_staff)
         elif view.action in ['update', 'partial_update']:
             return False

@@ -11,7 +11,7 @@ from imagekit.processors import ResizeToFill
 
 ERROR_MSG = 'error'
 JOIN_CMD = '0000'
-QUIT_CMD = '0001'
+PORT_NUM = 30000
 
 class Game(models.Model):
     name = models.CharField(max_length=45)
@@ -38,34 +38,31 @@ class GameSession(models.Model):
     user = models.ForeignKey(User)
     game = models.ForeignKey(Game)
     controller = models.IntegerField()
+    streaming_port = models.IntegerField()
 
     class Meta:
         unique_together = ['user', 'game']
 
     def join_game(self, gameobj):
-        controllerid = -1
+        data = {
+            'controllerid': -1,
+            'streaming_port': -1
+        }
         try:
             controllers = range(gameobj.max_limit)
             occupied = GameSession.objects.filter(game=gameobj). \
                        values_list('controller', flat=True)
             available = list(set(controllers)-set(occupied))
-            controllerid = available[0]
+            data['controllerid'] = available[0]
         except IndexError:
-            controllerid = -1
+            return data
 
-        if(controllerid != -1):
-            command = JOIN_CMD + str(controllerid).zfill(4)
+        if(data['controllerid'] != -1):
+            command = JOIN_CMD + str(data['controllerid']).zfill(4)
             result = utils.connect_to_CPP(command)
             if(result != ERROR_MSG):
-                return controllerid
-        return -1
-
-    def quit_game(self, game_session):
-        command = QUIT_CMD + str(game_session.controller).zfill(4)
-        result = utils.connect_to_CPP(command)
-        if(result != ERROR_MSG):
-            return True
-        return False
+                data['streaming_port'] = data['controllerid'] + PORT_NUM
+        return data
 
 class PlayerSaveData(models.Model):
     saved_file = models.CharField(max_length=45)

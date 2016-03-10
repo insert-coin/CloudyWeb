@@ -8,13 +8,13 @@ import imagekit.models.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cloudygames', '0019_auto_20160310_1650'),
+        ('cloudygames', '0018_auto_20160304_0224'),
     ]
 
     operations = [
-        migrations.AlterField(
+        migrations.AddField(
             model_name='game',
             name='thumbnail',
-            field=imagekit.models.fields.ProcessedImageField(upload_to='game_thumbnails', default='settings.MEDIA_ROOT/game_thumbnails/default.png'),
+            field=imagekit.models.fields.ProcessedImageField(upload_to='game_thumbnails', default='/game_thumbnails/default.png'),
         ),
     ]

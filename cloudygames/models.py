@@ -36,6 +36,9 @@ class GameOwnership(models.Model):
     class Meta:
         unique_together = ['user', 'game']
 
+    def __str__(self):
+        return self.user.username + ' - ' + self.game.name
+
 class GameSession(models.Model):
     user = models.ForeignKey(User)
     game = models.ForeignKey(Game)
@@ -66,10 +69,16 @@ class GameSession(models.Model):
                 data['streaming_port'] = data['controllerid'] + PORT_NUM
         return data
 
+    def __str__(self):
+        return self.user.username + ' - ' + self.game.name
+
 class PlayerSaveData(models.Model):
     saved_file = models.CharField(max_length=45)
     is_autosaved = models.BooleanField(default=False)
     user = models.ForeignKey(User)
     game = models.ForeignKey(Game)
+
+    def __str__(self):
+        return self.saved_file
 
 # Need to add for genres in future sprints

@@ -2,8 +2,12 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.forms.models import model_to_dict
+from django.conf import settings
 
 from cloudygames import utils
+
+from imagekit.models import ProcessedImageField
+from imagekit.processors import ResizeToFill
 
 ERROR_MSG = 'error'
 JOIN_CMD = '0000'
@@ -14,6 +18,14 @@ class Game(models.Model):
     publisher = models.CharField(max_length=45)
     max_limit = models.IntegerField()
     address = models.CharField(max_length=45)
+    thumbnail = ProcessedImageField(
+        upload_to = 'game_thumbnails',
+        processors = [ResizeToFill(100, 100)],
+        format = 'PNG',
+        options = {'quality': 60},
+        default = '/game_thumbnails/default.png',
+    )
+
 
 class GameOwnership(models.Model):
     user = models.ForeignKey(User)

@@ -8,7 +8,7 @@ class GameSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Game
-        fields = ('id', 'name', 'publisher', 'max_limit', 'address')
+        fields = ('id', 'name', 'publisher', 'max_limit', 'address', 'thumbnail')
 
 class GameOwnershipSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(

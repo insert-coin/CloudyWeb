@@ -28,7 +28,7 @@ class UserIsOwnerOrOperator(permissions.BasePermission):
     def has_permission(self, request, view):
         if view.action == 'create':
             return request.user.is_authenticated() and \
-            ((request.user.username == request.data.get('user', None)) or \
+            ((request.user.username == request.data.get('user')) or \
                 request.user.is_staff)
         return request.user.is_authenticated()
 
@@ -45,7 +45,7 @@ class UserIsOwnerOrOperatorExceptUpdate(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method == 'POST' and view.action == 'create':
             return request.user.is_authenticated() and \
-            ((request.user.username == request.data.get('user', None)) or \
+            ((request.user.username == request.data.get('user')) or \
                 request.user.is_staff)
         elif view.action in ['update', 'partial_update']:
             return False

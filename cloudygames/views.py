@@ -76,33 +76,19 @@ class GameSessionViewSet(viewsets.ModelViewSet):
                 (self.request.user.is_staff):
                 # User owns the game
                 controller = GameSession.join_game(self, game)
-                if(controller != -1):
+                if(controller['controllerid'] != -1):
                     #Create game session
                     session = GameSession.objects.create(
                         game=game,
                         user=user,
-                        controller=controller
+                        controller=controller['controllerid'],
+                        streaming_port=controller['streaming_port']
                     )
                     serializer = GameSessionSerializer(session)
                     return Response(
                         serializer.data,
                         status=status.HTTP_201_CREATED
                     )
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-
-    def destroy(self, request, *args, **kwargs):
-        if(self.request.user.is_staff):
-            session = get_object_or_404(GameSession, id=kwargs['pk'])
-        else:
-            session = get_object_or_404(
-                GameSession,
-                user=self.request.user,
-                id=kwargs['pk']
-            )
-
-        if(GameSession.quit_game(self, session)):
-            session.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 class PlayerSaveDataViewSet(viewsets.ModelViewSet):

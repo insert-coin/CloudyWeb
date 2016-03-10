@@ -71,8 +71,9 @@ class GameSessionViewSet(viewsets.ModelViewSet):
             game = serializer.validated_data['game']
             user = serializer.validated_data['user']
 
-            if game.id in GameOwnership.objects.filter(
-                user=user).values_list('game__id', flat=True):
+            if (game.id in GameOwnership.objects.filter(
+                user=user).values_list('game__id', flat=True)) or \
+                (self.request.user.is_staff):
                 # User owns the game
                 controller = GameSession.join_game(self, game)
                 if(controller['controllerid'] != -1):

@@ -12,7 +12,9 @@ Class-based views
 Including another URLconf
     1. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
+from django.conf import settings
 from django.conf.urls import include, url
+from django.conf.urls.static import static
 from django.contrib import admin
 from rest_framework.authtoken import views as authtoken_views
 from rest_framework import routers
@@ -34,4 +36,4 @@ urlpatterns = router.urls + [
     url(r'^api-auth/', include('rest_framework.urls', 
         namespace='rest_framework')),
     url(r'^api-token-auth/', accounts_views.obtain_auth_token, name='token-auth'),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -35,5 +35,5 @@ urlpatterns = router.urls + [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api-auth/', include('rest_framework.urls', 
         namespace='rest_framework')),
-    url(r'^api-token-auth/', authtoken_views.obtain_auth_token, name='token-auth'),
+    url(r'^api-token-auth/', accounts_views.obtain_auth_token, name='token-auth'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

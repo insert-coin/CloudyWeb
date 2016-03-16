@@ -129,6 +129,7 @@ class PlayerSaveDataViewSet(
         mixins.CreateModelMixin,
         mixins.RetrieveModelMixin,
         mixins.DestroyModelMixin,
+        mixins.ListModelMixin,
         viewsets.GenericViewSet):
     serializer_class = PlayerSaveDataSerializer
     filter_class = PlayerSaveDataFilter

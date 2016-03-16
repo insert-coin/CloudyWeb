@@ -1,18 +1,11 @@
 import tempfile
 
-from django import test as dj_test
 from django.core.urlresolvers import reverse
 
 from rest_framework import test as drf_test
 from rest_framework import status
 
 from .. import models
-
-
-
-class SaveGameTest(dj_test.TestCase):
-    def setUp(self):
-        pass
 
 
 class SaveGameAPITest(drf_test.APITestCase):

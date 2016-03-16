@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.core import serializers
 from django.db import IntegrityError
 
-from rest_framework import viewsets, generics, status, filters
+from rest_framework import viewsets, generics, status, filters, mixins
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
@@ -125,7 +125,11 @@ class GameSessionViewSet(viewsets.ModelViewSet):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-class PlayerSaveDataViewSet(viewsets.ModelViewSet):
+class PlayerSaveDataViewSet(
+        mixins.CreateModelMixin,
+        mixins.RetrieveModelMixin,
+        mixins.DestroyModelMixin,
+        viewsets.GenericViewSet):
     serializer_class = PlayerSaveDataSerializer
     filter_class = PlayerSaveDataFilter
     permission_classes = (UserIsOperatorButOwnerCanRead,)

@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.core import serializers
 from django.db import IntegrityError
 
-from rest_framework import viewsets, generics, status, filters
+from rest_framework import viewsets, generics, status, filters, mixins
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
@@ -35,8 +35,10 @@ class GameViewSet(viewsets.ModelViewSet):
     serializer_class = GameSerializer
     filter_class = GameFilter
     permission_classes = (OperatorOnlyButPublicReadAccess,)
+    queryset = Game.objects.all()
 
     def get_queryset(self):
+        qs = super().get_queryset()
         if not self.request.user.is_anonymous():
             is_owned = self.request.query_params.get('owned', 0)
             # Only returns the games this user owns
@@ -44,31 +46,35 @@ class GameViewSet(viewsets.ModelViewSet):
                 user = self.request.user
                 owned_games_id = GameOwnership.objects.filter(
                     user=user).values_list('game__id', flat=True)
-                return Game.objects.filter(pk__in=owned_games_id)
+                return qs.filter(pk__in=owned_games_id)
         # Returns all games
-        return Game.objects.all().order_by('name')
+        return qs.order_by('name')
 
 class GameOwnershipViewSet(viewsets.ModelViewSet):
     serializer_class = GameOwnershipSerializer
     filter_class = GameOwnershipFilter
     permission_classes = (UserIsOwnerOrOperatorExceptUpdate,)
+    queryset = GameOwnership.objects.all()
 
     def get_queryset(self):
+        qs = super().get_queryset()
         user = self.request.user
-        if(user.is_staff):
-            return GameOwnership.objects.all()
-        return GameOwnership.objects.filter(user=user)
+        if not user.is_staff:
+            qs = qs.filter(user=user)
+        return qs
 
 class GameSessionViewSet(viewsets.ModelViewSet):
     serializer_class = GameSessionSerializer
     filter_class = GameSessionFilter
     permission_classes = (UserIsOwnerOrOperatorExceptUpdate,)
+    queryset = GameSession.objects.all()
     
     def get_queryset(self):
+        qs = super().get_queryset()
         user = self.request.user
-        if(user.is_staff):
-            return GameSession.objects.all()
-        return GameSession.objects.filter(user=user)
+        if not user.is_staff:
+            qs = qs.filter(user=user)
+        return qs
 
     def create(self, request):
         serializer = GameSessionSerializer(data=request.data)
@@ -119,65 +125,26 @@ class GameSessionViewSet(viewsets.ModelViewSet):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-class PlayerSaveDataViewSet(viewsets.ModelViewSet):
+class PlayerSaveDataViewSet(
+        mixins.CreateModelMixin,
+        mixins.RetrieveModelMixin,
+        mixins.DestroyModelMixin,
+        mixins.ListModelMixin,
+        viewsets.GenericViewSet):
     serializer_class = PlayerSaveDataSerializer
     filter_class = PlayerSaveDataFilter
     permission_classes = (UserIsOperatorButOwnerCanRead,)
+    queryset = PlayerSaveData.objects.all()
 
     def get_queryset(self):
+        qs = super().get_queryset()
         user = self.request.user
-        if(user.is_staff):
-            return PlayerSaveData.objects.all()
-        return PlayerSaveData.objects.filter(user=user)
+        if not user.is_staff:
+            qs = qs.filter(user=user)
+        return qs
 
-    def create(self, request):
-        response_data = {}
-
-        controller = request.data.get('controller')
-        game_name = request.data.get('game_name');
-        is_autosaved = request.data.get('is_autosaved')
-        saved_file = request.data.get('saved_file')
-
-        # Validating
-        if(controller == None or game_name == None or saved_file == None):
-            response_data['message'] = 'The request data is not valid'
-            return Response(
-                json.dumps(response_data),
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        if(is_autosaved == None or is_autosaved != True):
-            is_autosaved = False # Default value
-
-        game = get_object_or_404(Game, name=game_name)
-        user = get_object_or_404(
-            GameSession,
-            game=game, controller=controller
-        ).user
-
-        # Duplicate
-        if(len(PlayerSaveData.objects.filter(user=user, game=game,
-        is_autosaved=is_autosaved)) > 0):
-            response_data['message'] = \
-                'Duplicated data. Please update the existing data instead'
-            return Response(
-                json.dumps(response_data),
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        try:
-            save_data = PlayerSaveData.objects.create(
-                game = game,
-                user = user,
-                is_autosaved = is_autosaved,
-                saved_file = saved_file
-            )
-            serializer = PlayerSaveDataSerializer(save_data)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        except IntegrityError as e:
-            response_data['message'] = e.message
-            return Response(
-                json.dumps(response_data),
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-#import ipdb; ipdb.set_trace()
+    def perform_create(self, serializer):
+        game_session = GameSession.objects.get(
+                game=serializer.validated_data['game'],
+                controller=serializer.initial_data['controller'])
+        serializer.save(user=game_session.user)

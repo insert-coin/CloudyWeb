@@ -74,7 +74,7 @@ class GameSession(models.Model):
         return self.user.username + ' - ' + self.game.name
 
 class PlayerSaveData(models.Model):
-    saved_file = models.FileField(upload_to='save_data/')
+    saved_file = models.FileField(upload_to='save_data')
     is_autosaved = models.BooleanField(default=False)
     user = models.ForeignKey(User)
     game = models.ForeignKey(Game)

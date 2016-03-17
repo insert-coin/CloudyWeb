@@ -39,7 +39,7 @@ class SaveGameAPITest(drf_test.APITestCase):
             'saved_file': self.mockfile,
             'is_autosaved': True,
             'controller': self.game_session.controller,
-            'game': self.game_session.game.id,
+            'game': self.game_session.game.name,
         }
 
         # Act
@@ -55,7 +55,7 @@ class SaveGameAPITest(drf_test.APITestCase):
             'saved_file': self.mockfile,
             'is_autosaved': True,
             'controller': self.game_session.controller,
-            'game': self.game_session.game.id,
+            'game': self.game_session.game.name,
         }
 
         # Act
@@ -74,7 +74,7 @@ class SaveGameAPITest(drf_test.APITestCase):
             'saved_file': self.mockfile,
             'is_autosaved': True,
             'controller': self.game_session.controller,
-            'game': self.game_session.game.id,
+            'game': self.game_session.game.name,
         }
 
         # Act

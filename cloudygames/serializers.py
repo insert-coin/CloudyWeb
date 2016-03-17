@@ -42,6 +42,8 @@ class PlayerSaveDataSerializer(serializers.ModelSerializer):
     is_autosaved = serializers.BooleanField(required=False, default=False)
     controller = serializers.IntegerField(
             source='user.gamesession_set.last.controller')
+    game = serializers.SlugRelatedField(slug_field='name',
+            queryset=Game.objects.all())
 
     class Meta:
         model = PlayerSaveData

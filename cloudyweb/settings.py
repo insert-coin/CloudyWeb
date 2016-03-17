@@ -14,8 +14,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PROJECT_DIR = os.path.dirname(__file__)
-PUBLIC_DIR = os.path.join(PROJECT_DIR, 'public')
+PUBLIC_DIR = os.path.join(BASE_DIR, 'public')
 
 
 # Quick-start development settings - unsuitable for production
@@ -114,7 +113,7 @@ STATIC_URL = '/static/'
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
-MEDIA_ROOT = os.path.join(PUBLIC_DIR, '/media/')
+MEDIA_ROOT = os.path.join(PUBLIC_DIR, 'media')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.

@@ -12,6 +12,7 @@ from imagekit.processors import ResizeToFill
 ERROR_MSG = 'error'
 JOIN_CMD = '0000'
 PORT_NUM = 30000
+INVALID = -1
 
 class Game(models.Model):
     name = models.CharField(max_length=45)
@@ -50,8 +51,8 @@ class GameSession(models.Model):
 
     def join_game(self, gameobj):
         data = {
-            'controllerid': -1,
-            'streaming_port': -1
+            'controllerid': INVALID,
+            'streaming_port': INVALID
         }
         try:
             controllers = range(gameobj.max_limit)
@@ -62,7 +63,7 @@ class GameSession(models.Model):
         except IndexError:
             return data
 
-        if(data['controllerid'] != -1):
+        if(data['controllerid'] != INVALID):
             command = JOIN_CMD + str(data['controllerid']).zfill(4)
             result = utils.connect_to_CPP(command)
             if(result != ERROR_MSG):
@@ -73,12 +74,15 @@ class GameSession(models.Model):
         return self.user.username + ' - ' + self.game.name
 
 class PlayerSaveData(models.Model):
-    saved_file = models.CharField(max_length=45)
+    saved_file = models.FileField(upload_to='save_data')
     is_autosaved = models.BooleanField(default=False)
     user = models.ForeignKey(User)
     game = models.ForeignKey(Game)
 
+    class Meta:
+        unique_together = ['user', 'game', 'is_autosaved']
+
     def __str__(self):
-        return self.saved_file
+        return self.user.username + ' - ' + self.game.name
 
 # Need to add for genres in future sprints

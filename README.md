@@ -138,7 +138,7 @@ python manage.py test
             url: '/game-session/3/'
             access right: operator or their own
     # Save Data
-        # Create Save Data
+        # Create or Update Save Data
             request method: POST
             url: '/save-data/'
             data: {'is_autosaved': False, 'saved_file': 'file1.txt', 'game': '1', 'user': 'user1'}, is_autosaved can be omitted (default = False)
@@ -151,11 +151,6 @@ python manage.py test
                  '/games/?user=user1'
             access right: operator or their own
             returns {'is_autosaved', 'id', 'saved_file', 'user', 'game'}
-        # Update Save Data
-            request method: PATCH
-            url: '/save-data/3/'
-            data: {} data that you want to update only, refer to create save data
-            access right: operator or their own
         # Delete Save Data
             request method: DELETE
             url: '/save-data/3/'

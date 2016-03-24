@@ -48,6 +48,7 @@ class PlayerSaveDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = PlayerSaveData
         fields = ('id', 'saved_file', 'is_autosaved', 'user', 'game')
+        validators = []
 
     def create(self, validated_data):
         saved_data, created = self.Meta.model.objects.update_or_create(

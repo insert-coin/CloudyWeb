@@ -24,7 +24,7 @@ class Game(models.Model):
         processors = [ResizeToFill(100, 100)],
         format = 'PNG',
         options = {'quality': 60},
-        default = 'settings.MEDIA_ROOT/thumbnails/default.png',
+        default = 'thumbnails/default.png',
     )
 
     def __str__(self): # Python object representation

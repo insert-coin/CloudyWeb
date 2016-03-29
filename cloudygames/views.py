@@ -89,16 +89,9 @@ class GameSessionViewSet(viewsets.ModelViewSet):
             user=user).values_list('game__id', flat=True)) or \
                 (self.request.user.is_staff):
 
-                controller = GameSession.join_game(self, game)
+                session = GameSession.join_game(self, game, user)
                 # User can play using the valid id
-                if(controller['controllerid'] != INVALID):
-                    #Create game session
-                    session = GameSession.objects.create(
-                        game=game,
-                        user=user,
-                        controller=controller['controllerid'],
-                        streaming_port=controller['streaming_port']
-                    )
+                if(session != None):
                     serializer = GameSessionSerializer(session)
                     return Response(
                         serializer.data,
@@ -114,14 +107,14 @@ class GameSessionViewSet(viewsets.ModelViewSet):
             else:
                 response_data['message'] = 'User does not have access for the game'
                 return Response(
-                    json.dumps(response_data),
+                    response_data,
                     status=status.HTTP_403_FORBIDDEN
                 )
         else:
             response_data['message'] = 'The request data is not valid'
 
         return Response(
-            json.dumps(response_data),
+            response_data,
             status=status.HTTP_400_BAD_REQUEST
         )
 
@@ -142,9 +135,3 @@ class PlayerSaveDataViewSet(
         if not user.is_staff:
             qs = qs.filter(user=user)
         return qs
-
-    def perform_create(self, serializer):
-        game_session = GameSession.objects.get(
-                game=serializer.validated_data['game'],
-                controller=serializer.initial_data['controller'])
-        serializer.save(user=game_session.user)

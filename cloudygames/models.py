@@ -10,7 +10,6 @@ from imagekit.models import ProcessedImageField
 from imagekit.processors import ResizeToFill
 
 ERROR_MSG = 'error'
-JOIN_CMD = '0000'
 PORT_NUM = 30000
 INVALID = -1
 
@@ -49,26 +48,41 @@ class GameSession(models.Model):
     class Meta:
         unique_together = ['user', 'game']
 
-    def join_game(self, gameobj):
-        data = {
-            'controllerid': INVALID,
-            'streaming_port': INVALID
-        }
+    def join_game(self, gameobj, user):
+        user_controller = INVALID
+
         try:
             controllers = range(gameobj.max_limit)
             occupied = GameSession.objects.filter(game=gameobj). \
                        values_list('controller', flat=True)
             available = list(set(controllers)-set(occupied))
-            data['controllerid'] = available[0]
+            user_controller = available[0]
         except IndexError:
-            return data
+            return None
 
-        if(data['controllerid'] != INVALID):
-            command = JOIN_CMD + str(data['controllerid']).zfill(4)
-            result = utils.connect_to_CPP(command)
+        if(user_controller != INVALID):
+            session = GameSession.objects.create(
+                        game = gameobj,
+                        user = user,
+                        controller = user_controller,
+                        streaming_port = user_controller + PORT_NUM
+                    )
+
+            data = {
+                'game_session_id': session.id,
+                'controller': user_controller,
+                'streaming_port': session.streaming_port,
+                'streaming_ip': gameobj.address,
+                'game_id': gameobj.id,
+                'username': user.username,
+                'command': 'join'
+            }
+            result = utils.connect_to_CPP(data)
             if(result != ERROR_MSG):
-                data['streaming_port'] = data['controllerid'] + PORT_NUM
-        return data
+                return session
+
+        session.delete()
+        return None
 
     def __str__(self):
         return self.user.username + ' - ' + self.game.name

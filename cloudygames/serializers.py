@@ -40,22 +40,15 @@ class GameSessionSerializer(serializers.ModelSerializer):
 
 class PlayerSaveDataSerializer(serializers.ModelSerializer):
     is_autosaved = serializers.BooleanField(required=False, default=False)
-    controller = serializers.IntegerField(
-            source='user.gamesession_set.last.controller')
-    game = serializers.SlugRelatedField(slug_field='name',
-            queryset=Game.objects.all())
+    user = serializers.SlugRelatedField(
+        slug_field='username',
+        queryset=User.objects.all()
+    )
 
     class Meta:
         model = PlayerSaveData
-        fields = ('id', 'saved_file', 'is_autosaved', 'controller', 'game')
-
-    def validate(self, data):
-        if not GameSession.objects.filter(
-                game=data['game'],
-                controller=self.initial_data['controller']).exists():
-            err_msg = 'Could not find the player under that game controller'
-            raise serializers.ValidationError({'controller': err_msg })
-        return data
+        fields = ('id', 'saved_file', 'is_autosaved', 'user', 'game')
+        validators = []
 
     def create(self, validated_data):
         saved_data, created = self.Meta.model.objects.update_or_create(

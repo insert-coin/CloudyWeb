@@ -99,7 +99,7 @@ class GameSessionViewSet(viewsets.ModelViewSet):
                     )
                 else:
                     response_data['message'] = \
-                        'Game\'s limit has been reached.\nPlease try again later'
+                        'Game\'s limit has been reached, try again later.'
             else:
                 response_data['message'] = 'User does not have access for the game'
                 return Response(

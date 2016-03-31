@@ -99,11 +99,7 @@ class GameSessionViewSet(viewsets.ModelViewSet):
                     )
                 else:
                     response_data['message'] = \
-                        'We currently could not find a valid \
-                        controllerid for you. This could be due to \
-                        temporary lost of connection with CloudyGames \
-                        or the game\'s limit has been exceeded. \
-                        Please try again after a while.'
+                        'Game\'s limit has been reached.\nPlease try again later'
             else:
                 response_data['message'] = 'User does not have access for the game'
                 return Response(

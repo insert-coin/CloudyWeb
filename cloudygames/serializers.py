@@ -8,7 +8,7 @@ class GameSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Game
-        fields = ('id', 'name', 'publisher', 'max_limit', 'address', 'thumbnail')
+        fields = ('id', 'name', 'description', 'publisher', 'max_limit', 'address', 'thumbnail')
 
 class GameOwnershipSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(
@@ -39,7 +39,6 @@ class GameSessionSerializer(serializers.ModelSerializer):
 
 
 class PlayerSaveDataSerializer(serializers.ModelSerializer):
-    is_autosaved = serializers.BooleanField(required=False, default=False)
     user = serializers.SlugRelatedField(
         slug_field='username',
         queryset=User.objects.all()
@@ -47,13 +46,12 @@ class PlayerSaveDataSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PlayerSaveData
-        fields = ('id', 'saved_file', 'is_autosaved', 'user', 'game')
+        fields = ('id', 'saved_file', 'user', 'game')
         validators = []
 
     def create(self, validated_data):
         saved_data, created = self.Meta.model.objects.update_or_create(
                 game=validated_data['game'],
                 user=validated_data['user'],
-                is_autosaved=validated_data['is_autosaved'],
                 defaults={'saved_file': validated_data['saved_file']})
         return saved_data

@@ -15,8 +15,9 @@ INVALID = -1
 
 class Game(models.Model):
     name = models.CharField(max_length=45)
+    description = models.TextField()
     publisher = models.CharField(max_length=45)
-    max_limit = models.IntegerField()
+    max_limit = models.IntegerField(default=4)
     address = models.CharField(max_length=45)
     thumbnail = ProcessedImageField(
         upload_to = 'thumbnails',
@@ -89,12 +90,11 @@ class GameSession(models.Model):
 
 class PlayerSaveData(models.Model):
     saved_file = models.FileField(upload_to='save_data')
-    is_autosaved = models.BooleanField(default=False)
     user = models.ForeignKey(User)
     game = models.ForeignKey(Game)
 
     class Meta:
-        unique_together = ['user', 'game', 'is_autosaved']
+        unique_together = ['user', 'game']
 
     def __str__(self):
         return self.user.username + ' - ' + self.game.name

@@ -76,12 +76,12 @@ python manage.py test
 
 ## API Usage
 
-    # Create User
-    $ curl -X POST http://127.0.0.1:8000/users/ --data "username=john&password=doe"
+    # Create User (Activation Email will be sent over the email)
+    $ curl -X POST http://127.0.0.1:8000/api-token-auth/registrations/ --data "email=john@doe.com&username=john&password=doe"
     ==> {"username":"john","email":"","first_name":"","last_name":""}
 
     # Retrieving Token
-    $ curl -X POST http://127.0.0.1:8000/api-token-auth/ --data "username=john&password=doe"
+    $ curl -X POST http://127.0.0.1:8000/api-token-auth/tokens/ --data "username=john&password=doe"
     ==> {"token":"7f1334b4b27202afe8ef3e078dfc849291e908b9"}
 
     # Retrieving Resources

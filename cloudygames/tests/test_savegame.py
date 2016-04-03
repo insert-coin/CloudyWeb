@@ -37,7 +37,6 @@ class SaveGameAPITest(drf_test.APITestCase):
         self.client.force_authenticate(self.player)
         data = {
             'saved_file': self.mockfile,
-            'is_autosaved': True,
             'user': self.player,
             'game': self.game_session.game.name,
         }
@@ -53,7 +52,6 @@ class SaveGameAPITest(drf_test.APITestCase):
         self.client.force_authenticate(self.operator)
         data = {
             'saved_file': self.mockfile,
-            'is_autosaved': True,
             'user': self.player.username,
             'game': self.game_session.game.id,
         }
@@ -67,12 +65,10 @@ class SaveGameAPITest(drf_test.APITestCase):
     def test_overwrite_save_data_success(self):
 
         # Arrange
-        models.PlayerSaveData.objects.create(user=self.player, game=self.game,
-                is_autosaved=True)
+        models.PlayerSaveData.objects.create(user=self.player, game=self.game)
         self.client.force_authenticate(self.operator)
         data = {
             'saved_file': self.mockfile,
-            'is_autosaved': True,
             'user': self.player.username,
             'game': self.game_session.game.id,
         }

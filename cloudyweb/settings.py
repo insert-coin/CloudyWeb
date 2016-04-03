@@ -45,6 +45,7 @@ INSTALLED_APPS = (
     'django_extensions',
     'rest_framework',
     'rest_framework.authtoken',
+    'rest_framework_registration',
 
     # Internal Apps
     'accounts',
@@ -67,7 +68,9 @@ ROOT_URLCONF = 'cloudyweb.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates'),
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -127,3 +130,10 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.DjangoFilterBackend',)
 }
+
+ACCOUNT_ACTIVATION_DAYS = 7
+
+try:
+    from .local_settings import *
+except ImportError:
+    pass

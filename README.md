@@ -39,6 +39,16 @@ Obtain the url to your git repository.
 git clone <URL_TO_GIT_RESPOSITORY>
 ```
 
+### Local Settings ###
+
+Copy the `__local_settings.py` template as `local_settings.py`
+You are free to overwrite any existing `settings.py` 
+for your local development.
+
+```bash
+cp cloudyweb/{__,}local_settings.py
+```
+
 ### Install requirements ###
 ```bash
 cd cloudyweb
@@ -66,12 +76,12 @@ python manage.py test
 
 ## API Usage
 
-    # Create User
-    $ curl -X POST http://127.0.0.1:8000/users/ --data "username=john&password=doe"
+    # Create User (Activation Email will be sent over the email)
+    $ curl -X POST http://127.0.0.1:8000/api-token-auth/registrations/ --data "email=john@doe.com&username=john&password=doe"
     ==> {"username":"john","email":"","first_name":"","last_name":""}
 
     # Retrieving Token
-    $ curl -X POST http://127.0.0.1:8000/api-token-auth/ --data "username=john&password=doe"
+    $ curl -X POST http://127.0.0.1:8000/api-token-auth/tokens/ --data "username=john&password=doe"
     ==> {"token":"7f1334b4b27202afe8ef3e078dfc849291e908b9"}
 
     # Retrieving Resources

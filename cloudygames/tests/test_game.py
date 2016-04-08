@@ -1,33 +1,30 @@
-from django.test import TestCase
-from django.core.urlresolvers import reverse
-from django.core import serializers
-from django.core.files.uploadedfile import SimpleUploadedFile
+
 from django.contrib.auth.models import User
 
 from rest_framework import status
 from rest_framework.test import APITestCase, force_authenticate, APIClient
 
-from cloudygames.models import Game, PlayerSaveData, GameOwnership
-from cloudygames.serializers import GameSerializer
+from cloudygames.models import Game, GameOwnership
 
-import json
-
-# Create your tests here.
 
 class GameAPITest(APITestCase):
 
+
+    ############################################################################
     # Set Up necessary temporary database for the tests
+    ############################################################################
+    
     def setUp(self):
-        # Users (User 1 = Operator, User 2 = Normal User)
+
+        # Users (Role: Operator & Player)        
         self.operator = User.objects.create(
             username="operator",
             password="operator",
             email="operator@email.com",
             first_name="firstname",
-            last_name="lastname"
+            last_name="lastname",
+            is_staff=True
         )
-        self.operator.is_staff = True
-        self.operator.save()
         self.player = User.objects.create(
             username="player",
             password="player",
@@ -36,7 +33,7 @@ class GameAPITest(APITestCase):
             last_name="lastname"
         )
 
-        # Game
+        # Games
         self.game1 = Game.objects.create(
             name="game1",
             publisher="pub1",
@@ -58,10 +55,13 @@ class GameAPITest(APITestCase):
             address="addr3",
             description="c"
         )
+
+        # Give game ownerships to users
         GameOwnership.objects.create(user=self.operator, game=self.game1)
         GameOwnership.objects.create(user=self.operator, game=self.game2)
         GameOwnership.objects.create(user=self.player, game=self.game1)
 
+        # Mock data for game creation
         self.mockdata = {
             'name': 'game4',
             'publisher': 'pub2',
@@ -81,32 +81,30 @@ class GameAPITest(APITestCase):
         self.client.force_authenticate(self.operator)
 
         # Act
-        response_create = client.post('/games/', self.mockdata},
-            format='json')
+        response_create = self.client.post('/games/', self.mockdata, format='json')
 
         # Assert
         self.assertEqual(response_create.status_code, status.HTTP_201_CREATED)
 
-        response_get_game = client.get('/games/?name=game4')
+        response_get_game = self.client.get('/games/?name=game4')
         self.assertEqual(response_get_game.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response_get_game.data), 1) # Data exists
 
 
     # Expected result : Access denied
-    def test_create_game_by_user_forbidden(self):
+    def test_create_game_by_player_forbidden(self):
 
         # Arrange
         self.client.force_authenticate(self.player)
 
         # Act
-        response_create = client.post('/games/', self.mockdata}, 
-            format='json')
+        response_create = self.client.post('/games/', self.mockdata, format='json')
 
         # Assert
-        self.assertEqual(response_create.status_code, \
+        self.assertEqual(response_create.status_code,
             status.HTTP_403_FORBIDDEN)
 
-        response_get_game = client.get('/games/?name=game4')
+        response_get_game = self.client.get('/games/?name=game4')
         self.assertEqual(response_get_game.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response_get_game.data), 0) # Data is not created
 
@@ -116,66 +114,77 @@ class GameAPITest(APITestCase):
     ############################################################################
 
     def test_get_games(self):
-        client1 = APIClient()
-        client1.force_authenticate(user=self.operator)
-        client2 = APIClient()
-        client2.force_authenticate(user=self.player)
-        clients = [client1, client2]
+        # Arrange
+        self.client.force_authenticate(self.player)
 
-        response1 = client1.get('/games/?owned=1')
-        response2 = client2.get('/games/?owned=1')
+        # Act
+        response_get_all = self.client.get('/games/')
+        response_get_by_id = self.client.get('/games/1/')
 
-        self.assertEqual(response1.status_code, status.HTTP_200_OK)
-        self.assertEqual(response2.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response1.data), 2)
-        self.assertEqual(len(response2.data), 1)
+        # Assert
+        self.assertEqual(response_get_all.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response_get_all.data), 3)
+
+        self.assertEqual(response_get_by_id.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_get_by_id.data['id'], 1)
+
+
+    def test_game_filter(self):
+
+        # Arrange
+        self.client.force_authenticate(self.player)
+
+        # Act        
+        response_filter1 = self.client.get('/games/?id=1&name=game1')
+        response_filter2 = self.client.get('/games/?publisher=pub1')
         
-        for client in clients:
-            response3 = client.get('/games/?owned=1&name=game1')
-            response4 = client.get('/games/?owned=1&name=game3')
-            response5 = client.get('/games/')
-            response6 = client.get('/games/1/')
-            response7 = client.get('/games/?id=1&name=game1')
-            response8 = client.get('/games/?publisher=pub1')
-            response9 = client.get('/games/?owned=0')
+        # Assert
+        self.assertEqual(response_filter1.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response_filter1.data), 1)
 
-            self.assertEqual(response3.status_code, status.HTTP_200_OK)
-            self.assertEqual(response4.status_code, status.HTTP_200_OK)
-            self.assertEqual(response5.status_code, status.HTTP_200_OK)
-            self.assertEqual(response6.status_code, status.HTTP_200_OK)
-            self.assertEqual(response7.status_code, status.HTTP_200_OK)
-            self.assertEqual(response8.status_code, status.HTTP_200_OK)
-            self.assertEqual(response9.status_code, status.HTTP_200_OK)
-            self.assertEqual(len(response3.data), 1)
-            self.assertEqual(len(response4.data), 0)
-            self.assertEqual(len(response5.data), 3)
-            self.assertEqual(response6.data['id'], 1)
-            self.assertEqual(len(response7.data), 1)
-            self.assertEqual(len(response8.data), 2)
-            self.assertEqual(len(response9.data), 3)
+        self.assertEqual(response_filter2.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response_filter2.data), 2)
 
-    def test_get_owned_games(self, client):
-        client = APIClient()
-        client
+
+    def test_owned_games(self):
+
+        # Arrange
+        self.client.force_authenticate(self.player)
+
+        # Act
+        response_owned = self.client.get('/games/?owned=1')
+        response_not_owned = self.client.get('/games/?owned=0')
+
+        # Assert
+        self.assertEqual(response_owned.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response_owned.data), 1)
+
+        self.assertEqual(response_not_owned.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response_not_owned.data), 3)
 
 
     ############################################################################
-    # TEST CREATE
+    # TEST UPDATE
     ############################################################################
 
     # Expected : Accepted, update some of the fields
-    def test_update_game_by_operator(self):
-        client = APIClient()
-        client.force_authenticate(user=self.operator)
+    def test_update_game_by_operator_success(self):
 
-        response_update = client.patch('/games/1/', data={
+        # Arrange
+        self.client.force_authenticate(self.operator)
+
+        # Act
+        response_update = self.client.patch('/games/1/', data={
             'name': 'game10',
             'address': 'addr10'
         }, format='json')
-        response = client.get('/games/1/')
 
+        # Assert
         self.assertEqual(response_update.status_code, status.HTTP_200_OK)
+
+        response = self.client.get('/games/1/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
         self.assertEqual(response.data['id'], 1)
         self.assertEqual(response.data['name'], 'game10')
         self.assertEqual(response.data['description'], 'a')
@@ -183,20 +192,26 @@ class GameAPITest(APITestCase):
         self.assertEqual(response.data['publisher'], 'pub1')
         self.assertEqual(response.data['max_limit'], 1)
 
-    # Expected : Forbidden
-    def test_update_game_by_user(self):
-        client = APIClient()
-        client.force_authenticate(user=self.player)
 
-        response_update = client.patch('/games/1/', data={
+    # Expected : Forbidden, no change should be made
+    def test_update_game_by_player_forbidden(self):
+
+        # Arrange
+        self.client.force_authenticate(self.player)
+
+        # Act
+        response_update = self.client.patch('/games/1/', data={
             'name': 'game10',
             'address': 'addr10'
         }, format='json')
-        response = client.get('/games/1/')
 
-        self.assertEqual(response_update.status_code, \
+        # Assert
+        self.assertEqual(response_update.status_code,
             status.HTTP_403_FORBIDDEN)
+
+        response = self.client.get('/games/1/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
         self.assertEqual(response.data['id'], 1)
         self.assertEqual(response.data['name'], 'game1')
         self.assertEqual(response.data['description'], 'a')
@@ -204,34 +219,41 @@ class GameAPITest(APITestCase):
         self.assertEqual(response.data['publisher'], 'pub1')
         self.assertEqual(response.data['max_limit'], 1)
 
+
+    ############################################################################
+    # TEST DELETE
+    ############################################################################
+
     # Expected : Allowed, delete game with certain id
-    def test_delete_game_by_operator(self):
-        client = APIClient()
-        client.force_authenticate(user=self.operator)
+    def test_delete_game_by_operator_success(self):
 
-        response_delete = client.delete('/games/3/')
-        response1 = client.get('/games/')
-        response2 = client.get('/games/?name=game3')
+        # Arrange
+        self.client.force_authenticate(self.operator)
 
-        self.assertEqual(response_delete.status_code, \
+        # Act
+        response_delete = self.client.delete('/games/3/')
+        
+        # Assert
+        self.assertEqual(response_delete.status_code,
             status.HTTP_204_NO_CONTENT)
-        self.assertEqual(response1.status_code, status.HTTP_200_OK)
-        self.assertEqual(response2.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response1.data), 2)
-        self.assertEqual(len(response2.data), 0)
 
-    # Expected : Forbidden
-    def test_delete_game_by_user(self):
-        client = APIClient()
-        client.force_authenticate(user=self.player)
+        response = self.client.get('/games/3/')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-        response_delete = client.delete('/games/3/')
-        response1 = client.get('/games/')
-        response2 = client.get('/games/?name=game3')
 
-        self.assertEqual(response_delete.status_code, \
+    # Expected : Forbidden, data should not be deleted
+    def test_delete_game_by_player_forbidden(self):
+        
+        # Arrange
+        self.client.force_authenticate(self.player)
+
+        # Act
+        response_delete = self.client.delete('/games/3/')
+
+        # Assert
+        self.assertEqual(response_delete.status_code,
             status.HTTP_403_FORBIDDEN)
-        self.assertEqual(response1.status_code, status.HTTP_200_OK)
-        self.assertEqual(response2.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response1.data), 3)
-        self.assertEqual(len(response2.data), 1)
+        
+        response = self.client.get('/games/3/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['id'], 3)

@@ -1,4 +1,9 @@
+
 from rest_framework import permissions
+
+############################################################################
+# Codes
+############################################################################
 
 class OperatorOnlyButPublicReadAccess(permissions.BasePermission):
 

@@ -89,7 +89,7 @@ class GameSessionViewSet(viewsets.ModelViewSet):
             user=user).values_list('game__id', flat=True)) or \
                 (self.request.user.is_staff):
 
-                session = GameSession.join_game(self, game, user)
+                session = GameSession.join_game(game, user)
                 # User can play using the valid id
                 if(session != None):
                     serializer = GameSessionSerializer(session)

@@ -49,7 +49,7 @@ class GameSession(models.Model):
     class Meta:
         unique_together = ['user', 'game']
 
-    def join_game(self, gameobj, user):
+    def join_game(gameobj, user):
         user_controller = INVALID
 
         try:

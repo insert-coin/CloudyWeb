@@ -10,7 +10,7 @@ def connect_to_CPP(data):
     response = ""
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    IP = '127.0.0.1'
+    IP = data['streaming_ip']
     PORT_NO = 55556
     BUFFER_SIZE = 1024
 

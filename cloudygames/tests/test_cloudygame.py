@@ -41,21 +41,21 @@ class CloudyGamesTests(APITestCase):
             name="game1",
             publisher="pub1",
             max_limit=1,
-            address="addr1",
+            address="http://127.0.0.1",
             description="a"
         )
         self.game2 = Game.objects.create(
             name="game2",
             publisher="pub1",
             max_limit=1,
-            address="addr2",
+            address="http://127.0.0.1",
             description="b"
         )
         self.game3 = Game.objects.create(
             name="game3",
             publisher="pub2",
             max_limit=4,
-            address="addr3",
+            address="http://127.0.0.1",
             description="c"
         )
         GameOwnership.objects.create(user=self.user1, game=self.game1)
@@ -73,7 +73,7 @@ class CloudyGamesTests(APITestCase):
             'name': 'game4',
             'publisher': 'pub2',
             'max_limit': 4,
-            'address': 'addr4',
+            'address': 'http://127.0.0.1',
             'description': 'abc'
         }, format='json')
         response1 = client.get('/games/')
@@ -94,7 +94,7 @@ class CloudyGamesTests(APITestCase):
             'name': 'game4',
             'publisher': 'pub2',
             'max_limit': 4,
-            'address': 'addr4',
+            'address': 'http://127.0.0.1',
             'description': 'aaa'
         }, format='json')
         response1 = client.get('/games/')
@@ -153,7 +153,7 @@ class CloudyGamesTests(APITestCase):
 
         response_update = client.patch('/games/1/', data={
             'name': 'game10',
-            'address': 'addr10'
+            'address': 'http://127.1.1.1'
         }, format='json')
         response = client.get('/games/1/')
 
@@ -162,7 +162,7 @@ class CloudyGamesTests(APITestCase):
         self.assertEqual(response.data['id'], 1)
         self.assertEqual(response.data['name'], 'game10')
         self.assertEqual(response.data['description'], 'a')
-        self.assertEqual(response.data['address'], 'addr10')
+        self.assertEqual(response.data['address'], 'http://127.1.1.1')
         self.assertEqual(response.data['publisher'], 'pub1')
         self.assertEqual(response.data['max_limit'], 1)
 
@@ -173,7 +173,7 @@ class CloudyGamesTests(APITestCase):
 
         response_update = client.patch('/games/1/', data={
             'name': 'game10',
-            'address': 'addr10'
+            'address': 'http://127.0.0.1'
         }, format='json')
         response = client.get('/games/1/')
 
@@ -183,7 +183,7 @@ class CloudyGamesTests(APITestCase):
         self.assertEqual(response.data['id'], 1)
         self.assertEqual(response.data['name'], 'game1')
         self.assertEqual(response.data['description'], 'a')
-        self.assertEqual(response.data['address'], 'addr1')
+        self.assertEqual(response.data['address'], 'http://127.0.0.1')
         self.assertEqual(response.data['publisher'], 'pub1')
         self.assertEqual(response.data['max_limit'], 1)
 

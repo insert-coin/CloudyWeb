@@ -18,7 +18,7 @@ class Game(models.Model):
     description = models.TextField()
     publisher = models.CharField(max_length=45)
     max_limit = models.IntegerField(default=4)
-    address = models.CharField(max_length=45)
+    address = models.URLField()
     thumbnail = ProcessedImageField(
         upload_to = 'thumbnails',
         processors = [ResizeToFill(100, 100)],

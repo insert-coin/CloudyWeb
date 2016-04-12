@@ -52,7 +52,7 @@ cp cloudyweb/{__,}local_settings.py
 ### Install requirements ###
 ```bash
 cd cloudyweb
-pip install -r requirements.txt
+pip install -r requirements/dev.txt
 ```
 
 ### Sync database ###

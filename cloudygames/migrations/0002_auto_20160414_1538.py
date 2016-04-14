@@ -11,9 +11,9 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RenameField(
+        migrations.AlterField(
             model_name='game',
-            old_name='user',
-            new_name='users',
+            name='address',
+            field=models.URLField(),
         ),
     ]

@@ -16,7 +16,7 @@ class SaveGameAPITest(drf_test.APITestCase):
                 username='operator1', email='op1@test.net', password='pass')
         self.player = models.User.objects.create_user(username='user1')
         self.game = models.Game.objects.create(name='game1', publisher='pub1',
-                max_limit=1, address='addr1')
+                max_limit=1, address='http://127.0.0.1/')
         models.GameOwnership.objects.create(user=self.player, game=self.game)
         self.game_session = models.GameSession.objects.create(user=self.player,
                 game=self.game, controller=1, streaming_port=30001)

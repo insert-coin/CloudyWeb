@@ -59,6 +59,7 @@ class GameSession(models.Model):
     class Meta:
         unique_together = ['user', 'game']
 
+
     # This function sends session data to see whether the session is accepted.
     #
     # param -    self
@@ -66,7 +67,7 @@ class GameSession(models.Model):
     #            user : User
     # returns -  GameSession (error: None)
     #
-    def join_game(self, gameobj, user):
+    def join_game(gameobj, user):
         user_controller = INVALID
 
         try:

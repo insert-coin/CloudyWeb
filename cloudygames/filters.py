@@ -1,7 +1,12 @@
+
 import django_filters
 
 from cloudygames.models \
     import Game, GameSession, PlayerSaveData, GameOwnership
+
+############################################################################
+# Codes
+############################################################################
 
 class GameFilter(django_filters.FilterSet):
 

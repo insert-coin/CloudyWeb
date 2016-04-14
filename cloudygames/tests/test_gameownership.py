@@ -38,21 +38,21 @@ class GameOwnershipAPITest(APITestCase):
             name="game1",
             publisher="pub1",
             max_limit=1,
-            address="addr1",
+            address="http://127.0.0.1/",
             description="a"
         )
         self.game2 = Game.objects.create(
             name="game2",
             publisher="pub1",
             max_limit=1,
-            address="addr2",
+            address="http://127.0.0.2/",
             description="b"
         )
         self.game3 = Game.objects.create(
             name="game3",
             publisher="pub2",
             max_limit=4,
-            address="addr3",
+            address="http://127.0.0.3/",
             description="c"
         )
 

@@ -62,7 +62,7 @@ python manage.py migrate
 
 ## Running ##
 ```bash
-python manage.py runserver
+python manage.py runserver 0.0.0.0:8000
 ```
 
 Open browser to http://127.0.0.1:8000

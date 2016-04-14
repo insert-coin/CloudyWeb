@@ -38,21 +38,21 @@ class GameAPITest(APITestCase):
             name="game1",
             publisher="pub1",
             max_limit=1,
-            address="http://127.0.0.1/",
+            address="addr1",
             description="a"
         )
         self.game2 = Game.objects.create(
             name="game2",
             publisher="pub1",
             max_limit=1,
-            address="http://127.0.0.2/",
+            address="addr2",
             description="b"
         )
         self.game3 = Game.objects.create(
             name="game3",
             publisher="pub2",
             max_limit=4,
-            address="http://127.0.0.3/",
+            address="addr3",
             description="c"
         )
 
@@ -66,7 +66,7 @@ class GameAPITest(APITestCase):
             'name': 'game4',
             'publisher': 'pub2',
             'max_limit': 4,
-            'address': 'http://127.0.0.4/',
+            'address': 'addr4',
             'description': 'abc'
         }
 
@@ -176,7 +176,7 @@ class GameAPITest(APITestCase):
         # Act
         response_update = self.client.patch('/games/1/', data={
             'name': 'game10',
-            'address': 'http://127.0.1.1/'
+            'address': 'addr10'
         }, format='json')
 
         # Assert
@@ -188,7 +188,7 @@ class GameAPITest(APITestCase):
         self.assertEqual(response.data['id'], 1)
         self.assertEqual(response.data['name'], 'game10')
         self.assertEqual(response.data['description'], 'a')
-        self.assertEqual(response.data['address'], 'http://127.0.1.1/')
+        self.assertEqual(response.data['address'], 'addr10')
         self.assertEqual(response.data['publisher'], 'pub1')
         self.assertEqual(response.data['max_limit'], 1)
 
@@ -202,7 +202,7 @@ class GameAPITest(APITestCase):
         # Act
         response_update = self.client.patch('/games/1/', data={
             'name': 'game10',
-            'address': 'http://127.0.1.1/'
+            'address': 'addr10'
         }, format='json')
 
         # Assert
@@ -215,7 +215,7 @@ class GameAPITest(APITestCase):
         self.assertEqual(response.data['id'], 1)
         self.assertEqual(response.data['name'], 'game1')
         self.assertEqual(response.data['description'], 'a')
-        self.assertEqual(response.data['address'], 'http://127.0.0.1/')
+        self.assertEqual(response.data['address'], 'addr1')
         self.assertEqual(response.data['publisher'], 'pub1')
         self.assertEqual(response.data['max_limit'], 1)
 

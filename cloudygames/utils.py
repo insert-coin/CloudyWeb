@@ -12,7 +12,6 @@ import json
 ERROR_MSG = 'error'
 
 # Address for CloudyWeb Plugin
-IP = '127.0.0.1'
 PORT_NO = 55556
 BUFFER_SIZE = 1024
 
@@ -36,8 +35,9 @@ BUFFER_SIZE = 1024
 #
 def connect_to_CPP(data):
     response = ""
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    IP = data['streaming_ip']
 
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         cmd = json.dumps(data)
         s.connect((IP, PORT_NO))

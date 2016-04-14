@@ -74,6 +74,20 @@ Open browser to http://127.0.0.1:8000
 python manage.py test
 ```
 
+## Usage In The CloudyGame Project ##
+To use CloudyWeb in the CloudyGame Project with Unreal Engine and Cloudy Launcher, some set up needs to be done. We assume that all deployment is done locally on one computer.
+
+1. Create a robot user with administrative rights.
+    - Type: `python manage.py createsuperuser`. 
+2. Add at least one game into the database.
+    - Open browser to `http://127.0.0.1:8000/admin`, and log in with the created robot user. 
+    - Click on "Games", then click on "Add game" on the top right.
+    - Enter the game details. For the address, enter `127.0.0.1`.
+3. Grant game ownership to the robot user.
+    - Open browser to `http://127.0.0.1:8000/admin`, and log in with the created robot user. 
+    - Click on "Game ownerships", then click on "Add game ownership" on the top right.
+    - Give the robot user game ownership for all the games you have added.
+4. The database is now set up. You can proceed to use [Cloudy Launcher](https://github.com/insert-coin/CloudyGameThinClient) and [Unreal Engine](https://github.com/insert-coin/UnrealEngine) (with the [plugins](https://github.com/insert-coin/CloudyGamePlugin)).
 
 ## API Usage ##
 ### Account ###

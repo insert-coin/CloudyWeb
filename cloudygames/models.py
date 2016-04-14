@@ -9,9 +9,17 @@ from cloudygames import utils
 from imagekit.models import ProcessedImageField
 from imagekit.processors import ResizeToFill
 
+############################################################################
+# Constants
+############################################################################
+
 ERROR_MSG = 'error'
-PORT_NUM = 30000
+PORT_NUM = 30000 # Offset for port number for player to plays the game
 INVALID = -1
+
+############################################################################
+# Codes
+############################################################################
 
 class Game(models.Model):
     name = models.CharField(max_length=45)
@@ -30,6 +38,7 @@ class Game(models.Model):
     def __str__(self): # Python object representation
         return self.name
 
+
 class GameOwnership(models.Model):
     user = models.ForeignKey(User)
     game = models.ForeignKey(Game)
@@ -40,6 +49,7 @@ class GameOwnership(models.Model):
     def __str__(self):
         return self.user.username + ' - ' + self.game.name
 
+
 class GameSession(models.Model):
     user = models.ForeignKey(User)
     game = models.ForeignKey(Game)
@@ -49,15 +59,27 @@ class GameSession(models.Model):
     class Meta:
         unique_together = ['user', 'game']
 
+
+    # This function sends session data to see whether the session is accepted.
+    #
+    # param -    self
+    #            gameobj : Game
+    #            user : User
+    # returns -  GameSession (error: None)
+    #
     def join_game(gameobj, user):
         user_controller = INVALID
 
         try:
-            controllers = range(gameobj.max_limit)
-            occupied = GameSession.objects.filter(game=gameobj). \
+
+            controllers = range(gameobj.max_limit) # Valid controller id
+            # Controller id currently used by user
+            occupied = GameSession.objects.filter(game = gameobj). \
                        values_list('controller', flat=True)
-            available = list(set(controllers)-set(occupied))
+            # Find suitable controller id
+            available = list(set(controllers) - set(occupied))
             user_controller = available[0]
+
         except IndexError:
             return None
 
@@ -82,11 +104,13 @@ class GameSession(models.Model):
             if(result != ERROR_MSG):
                 return session
 
+        # Failed: rollback
         session.delete()
         return None
 
     def __str__(self):
         return self.user.username + ' - ' + self.game.name
+
 
 class PlayerSaveData(models.Model):
     saved_file = models.FileField(upload_to='save_data')
@@ -98,5 +122,3 @@ class PlayerSaveData(models.Model):
 
     def __str__(self):
         return self.user.username + ' - ' + self.game.name
-
-# Need to add for genres in future sprints

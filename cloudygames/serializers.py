@@ -1,8 +1,13 @@
+
 from rest_framework import serializers
 from accounts.serializers import UserSerializer
 from django.contrib.auth.models import User
 from cloudygames.models \
     import Game, PlayerSaveData, GameSession, GameOwnership
+
+############################################################################
+# Codes
+############################################################################
 
 class GameSerializer(serializers.ModelSerializer):
     
@@ -49,6 +54,7 @@ class PlayerSaveDataSerializer(serializers.ModelSerializer):
         fields = ('id', 'saved_file', 'user', 'game')
         validators = []
 
+    # If current data exists, overwrite with new one
     def create(self, validated_data):
         saved_data, created = self.Meta.model.objects.update_or_create(
                 game=validated_data['game'],

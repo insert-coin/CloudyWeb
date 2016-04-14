@@ -45,6 +45,7 @@ Copy the `__local_settings.py` template as `local_settings.py`
 You are free to overwrite any existing `settings.py` 
 for your local development.
 
+The following command only works on Mac/Linux. Please do the above manually for Windows.
 ```bash
 cp cloudyweb/{__,}local_settings.py
 ```

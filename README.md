@@ -51,8 +51,12 @@ cp cloudyweb/{__,}local_settings.py
 ```
 
 ### Install requirements ###
+Navigate to the root directory of the repository using the command line on your computer (you may have to navigate folder by folder until you reach it):
 ```bash
 cd cloudyweb
+```
+Then, type the following into your command line:
+```bash
 pip install -r requirements/dev.txt
 ```
 

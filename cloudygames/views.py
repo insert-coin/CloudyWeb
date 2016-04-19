@@ -29,7 +29,15 @@ from cloudygames.filters \
 
 import json
 
+############################################################################
+# Constants
+############################################################################
+
 INVALID = -1
+
+############################################################################
+# Codes
+############################################################################
 
 class GameViewSet(viewsets.ModelViewSet):
     serializer_class = GameSerializer
@@ -39,6 +47,7 @@ class GameViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
+
         if not self.request.user.is_anonymous():
             is_owned = self.request.query_params.get('owned', 0)
             # Only returns the games this user owns
@@ -47,8 +56,10 @@ class GameViewSet(viewsets.ModelViewSet):
                 owned_games_id = GameOwnership.objects.filter(
                     user=user).values_list('game__id', flat=True)
                 return qs.filter(pk__in=owned_games_id)
+
         # Returns all games
         return qs.order_by('name')
+
 
 class GameOwnershipViewSet(viewsets.ModelViewSet):
     serializer_class = GameOwnershipSerializer
@@ -59,9 +70,12 @@ class GameOwnershipViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         qs = super().get_queryset()
         user = self.request.user
+
+        # Normal user can only access their own
         if not user.is_staff:
             qs = qs.filter(user=user)
         return qs
+
 
 class GameSessionViewSet(viewsets.ModelViewSet):
     serializer_class = GameSessionSerializer
@@ -72,6 +86,8 @@ class GameSessionViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         qs = super().get_queryset()
         user = self.request.user
+
+        # Normal user can only access their own
         if not user.is_staff:
             qs = qs.filter(user=user)
         return qs
@@ -87,9 +103,9 @@ class GameSessionViewSet(viewsets.ModelViewSet):
             # User has access over the game
             if (game.id in GameOwnership.objects.filter(
             user=user).values_list('game__id', flat=True)) or \
-                (self.request.user.is_staff):
+            (self.request.user.is_staff):
 
-                session = GameSession.join_game(self, game, user)
+                session = GameSession.join_game(game, user)
                 # User can play using the valid id
                 if(session != None):
                     serializer = GameSessionSerializer(session)
@@ -128,6 +144,8 @@ class PlayerSaveDataViewSet(
     def get_queryset(self):
         qs = super().get_queryset()
         user = self.request.user
+
+        # Normal user can only access their own
         if not user.is_staff:
             qs = qs.filter(user=user)
         return qs

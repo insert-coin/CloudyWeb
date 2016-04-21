@@ -9,5 +9,11 @@ install:
 before_script:
     - python manage.py migrate
 
+before_install:
+    - pip install codecov
+  
+after_success:
+    - codecov
+  
 script:
-    - python manage.py test
+    - "coverage run --source='.' manage.py test"

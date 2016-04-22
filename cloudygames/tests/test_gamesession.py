@@ -1,4 +1,5 @@
 
+from unittest import mock
 from django.contrib.auth.models import User
 
 from rest_framework import status
@@ -15,6 +16,8 @@ class GameSessionAPITest(APITestCase):
     ############################################################################
     
     def setUp(self):
+        self.patcher = mock.patch('cloudygames.utils.connect_to_CPP')
+        self.patcher.start()
 
         # Users (Role: Operator & Player)        
         self.operator = User.objects.create(
@@ -75,6 +78,9 @@ class GameSessionAPITest(APITestCase):
             controller=0,
             streaming_port=30000
         )
+
+    def tearDown(self):
+        self.patcher.stop()
 
 
     ############################################################################

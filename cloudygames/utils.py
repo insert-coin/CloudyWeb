@@ -44,10 +44,7 @@ def connect_to_CPP(data):
         s.sendall(cmd.encode("utf-8"))
         response = s.recv(BUFFER_SIZE).decode("utf-8")
     except socket.error as error:
-        if error.errno == errno.WSAECONNRESET:
-            response = ERROR_MSG
-        else:
-            raise
+        response = ERROR_MSG
     finally:
         s.close()
         return response

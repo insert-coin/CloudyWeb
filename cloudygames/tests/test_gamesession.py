@@ -7,6 +7,10 @@ from rest_framework.test import APITestCase, force_authenticate, APIClient
 
 from cloudygames.models import Game, GameOwnership, GameSession
 
+import socket
+
+CLOUDYWEB_CONNECTOR_PORT = 55556
+
 
 class GameSessionAPITest(APITestCase):
 
@@ -16,8 +20,10 @@ class GameSessionAPITest(APITestCase):
     ############################################################################
     
     def setUp(self):
-        self.patcher = mock.patch('cloudygames.utils.connect_to_CPP')
-        self.patcher.start()
+        patcher = mock.patch('socket.socket.connect',
+                                  side_effect=socket.socket.connect)
+        self.connect_to_cpp = patcher.start()
+        self.addCleanup(patcher.stop)
 
         # Users (Role: Operator & Player)        
         self.operator = User.objects.create(
@@ -79,9 +85,6 @@ class GameSessionAPITest(APITestCase):
             streaming_port=30000
         )
 
-    def tearDown(self):
-        self.patcher.stop()
-
 
     ############################################################################
     # TEST CREATE (JOIN GAME)
@@ -102,6 +105,8 @@ class GameSessionAPITest(APITestCase):
         # Assert
         self.assertEqual(response_create.status_code,
             status.HTTP_201_CREATED)
+        self.connect_to_cpp.assert_called_once_with(
+                (self.game2.address, CLOUDYWEB_CONNECTOR_PORT))
 
         response_read_game2 = self.client.get('/game-session/?game=2')
         self.assertEqual(response_read_game2.status_code, status.HTTP_200_OK)
@@ -123,6 +128,8 @@ class GameSessionAPITest(APITestCase):
         # Assert
         self.assertEqual(response_create.status_code,
             status.HTTP_201_CREATED)
+        self.connect_to_cpp.assert_called_once_with(
+                (self.game3.address, CLOUDYWEB_CONNECTOR_PORT))
 
         response_read_game3 = self.client.get('/game-session/?game=3')
         self.assertEqual(response_read_game3.status_code, status.HTTP_200_OK)
@@ -144,6 +151,8 @@ class GameSessionAPITest(APITestCase):
         # Assert
         self.assertEqual(response_create.status_code,
             status.HTTP_201_CREATED)
+        self.connect_to_cpp.assert_called_once_with(
+                (self.game2.address, CLOUDYWEB_CONNECTOR_PORT))
 
         response_read_game2 = self.client.get('/game-session/?game=2')
         self.assertEqual(response_read_game2.status_code, status.HTTP_200_OK)
@@ -165,6 +174,8 @@ class GameSessionAPITest(APITestCase):
         # Assert
         self.assertEqual(response_create.status_code,
             status.HTTP_201_CREATED)
+        self.connect_to_cpp.assert_called_once_with(
+                (self.game2.address, CLOUDYWEB_CONNECTOR_PORT))
 
         response_read_game2 = self.client.get('/game-session/?game=2')
         self.assertEqual(response_read_game2.status_code, status.HTTP_200_OK)
@@ -186,6 +197,7 @@ class GameSessionAPITest(APITestCase):
         # Assert
         self.assertEqual(response_create.status_code,
             status.HTTP_403_FORBIDDEN)
+        self.connect_to_cpp.assert_not_called()
 
 
     # Expected : Forbidden, player can only create for their own
@@ -203,6 +215,7 @@ class GameSessionAPITest(APITestCase):
         # Assert
         self.assertEqual(response_create.status_code,
             status.HTTP_403_FORBIDDEN)
+        self.connect_to_cpp.assert_not_called()
 
 
     # Expected : Can not create duplicated session
@@ -220,6 +233,7 @@ class GameSessionAPITest(APITestCase):
         # Assert
         self.assertEqual(response_duplicate.status_code,
             status.HTTP_400_BAD_REQUEST)
+        self.connect_to_cpp.assert_not_called()
 
 
     # Expected : Failed
@@ -237,6 +251,7 @@ class GameSessionAPITest(APITestCase):
         # Assert
         self.assertEqual(response_invalid.status_code,
             status.HTTP_400_BAD_REQUEST)
+        self.connect_to_cpp.assert_not_called()
 
 
     # Expected : Failed
@@ -254,6 +269,7 @@ class GameSessionAPITest(APITestCase):
         # Assert
         self.assertEqual(response_limit.status_code,
             status.HTTP_400_BAD_REQUEST)
+        self.connect_to_cpp.assert_not_called()
 
 
     ############################################################################

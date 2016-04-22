@@ -28,6 +28,8 @@ router.register(r'game-ownership', cloudygames_views.GameOwnershipViewSet)
 router.register(r'game-session', cloudygames_views.GameSessionViewSet)
 router.register(r'save-data', cloudygames_views.PlayerSaveDataViewSet)
 
+admin.site.site_header = 'CloudyPanel'
+
 urlpatterns = router.urls + [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api-auth/', 

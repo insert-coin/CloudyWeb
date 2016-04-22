@@ -7,6 +7,7 @@ Cloudyweb is
 Continuous Integration:
 
 [![Build Status](https://travis-ci.org/insert-coin/cloudyweb.svg?branch=master)](https://travis-ci.org/insert-coin/cloudyweb)
+[![Codecov]( https://codecov.io/github/insert-coin/cloudyweb/coverage.svg?branch=master)](https://codecov.io/github/insert-coin/cloudyweb?branch=master)
 
 ## Prerequisites ##
 
